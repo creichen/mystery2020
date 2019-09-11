@@ -1,0 +1,4 @@
+BEGIN
+  PRINT 0;
+  PRINT 1
+END

@@ -1,0 +1,38 @@
+abstract Decl;
+VarDecl		: Decl ::= <Name> Type ;
+TypeDecl	: Decl ::= <Name> Type ;
+ProcDecl	: Decl ::= <Name> Formal* Type Block ;
+
+Formal		::= <Name> Type ;
+Subrange	::= <Lower> <Upper> ;
+
+abstract Type;
+IntType		: Type;
+UnitType	: Type;
+SubrangeType	: Type ::= Subrange ;
+ArrayType	: Type ::= Subrange ElementType:Type ;
+NamedType	: Type ::= <Name> ;
+ProcType	: Type ::= Formal* Type ;
+
+abstract Stmt;
+Assignment	: Stmt ::= LHS:Expr RHS:Expr;
+Return		: Stmt ::= Expr;
+Block		: Stmt ::= Decl* Stmt* ;
+Conditional	: Stmt ::= Cond:Expr TrueBranch:Stmt* FalseBranch:Stmt*;
+While		: Stmt ::= Cond:Expr Body:Stmt*;
+Output		: Stmt ::= Expr;
+ExprStmt	: Stmt ::= Expr;
+
+abstract Expr;
+BinOpSequence	: Expr ::= LHS:Expr Operator RHS:Expr ; // defer precedence parsing to semantic analysis (Operator, RHS optional)
+BinOp		: Expr ::= LHS:Expr Operator RHS:Expr ;
+Number		: Expr ::= <Number> ;
+ID		: Expr ::= <Name> ;
+Subscription	: Expr ::= Target:Expr Index:Expr ;
+Call		: Expr ::= Callee:Expr Actuals:Expr* ;
+
+abstract Operator;
+AddOp	: Operator;
+GTOp	: Operator;
+EqOp	: Operator;
+AndOp	: Operator;

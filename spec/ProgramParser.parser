@@ -1,0 +1,117 @@
+%header {:
+  package AST; // already generated?
+:};
+
+%goal program;
+
+%embed {:
+:};
+
+
+block program =
+        block		{: return block; :}
+      | block SEMICOLON	{: return block; :}
+      ;
+
+List decls =
+      /* empty */	{: return new List(); :}
+    | decl_list		{: return decl_list; :}
+    ;
+
+List decl_list =
+      decl			{: return new List().add(decl); :}
+    | decl SEMICOLON decl_list	{: return decl_list.add(decl); :}
+    ;
+
+Decl decl =
+      VAR IDENTIFIER opt_type	{: return new VarDecl(IDENTIFIER, opt_type); :}
+    | TYPE IDENTIFIER EQ type	{: return new TypeDecl(IDENTIFIER, type); :}
+    | PROCEDURE IDENTIFIER OPAREN formals CPAREN opt_type EQ block
+				{: return new ProcDecl(IDENTIFIER, formals, opt_type, block); :}
+    ;
+
+Type opt_type =
+      /* empty */		{: return null; :}
+    | COLON type		{: return type; :}
+    ;
+
+List formals =
+      /* empty */		{: return new List(); :}
+    | formal_list		{: return formal_list; :}
+    ;
+
+List formal_list =
+      formal			{: return new List().add(formal); :}
+    | formal_list COMMA formal	{: return formal_list.add(formal); :}
+    ;
+
+Formal formal =
+      IDENTIFIER opt_type	{: return new Formal(IDENTIFIER, opt_type); :}
+    ;
+
+Type type =
+    INTEGER						{: return new IntType(); :}
+    | UNIT						{: return new UnitType(); :}
+    | subrange						{: return new SubrangeType(subrange); :}
+    | ARRAY subrange OF opt_type			{: return new ArrayType(subrange, opt_type); :}
+    | IDENTIFIER					{: return new NamedType(IDENTIFIER); :}
+    | PROCEDURE OPAREN formals CPAREN OF opt_type	{: return new ProcType(formals, opt_type); :}
+    ;
+
+Subrange subrange =
+      OBRACKET INT_LITERAL.LOW TO INT_LITEARAL.HIGH CBRACKET
+			{: return new Subrange(LOW, HIGH); :}
+    ;
+
+Block block =
+      decls BEGIN stmts END	{: return new Block(decls, stmts); :}
+    ;
+
+List stmts =
+      /* empty */	{: return new List(); :}
+    | stmt_list 	{: return stmt_list; :}
+    ;
+
+List stmt_list =
+      stmt			{: return new List().add(stmt); :}
+    | stmt_list SEMICOLON stmt	{: return stmt_list.add(stmt); :}
+    ;
+
+Stmt stmt =
+      expr.lhs COLONEQ expr.rhs			{: return new Assignment(lhs, rhs); :}
+    | RETURN expr				{: return new Return(expr); :}
+    | block					{: return block; :}
+    | IF expr THEN stmts.tb ELSE stmts.fb END	{: return new Conditional(expr, tb, fb); :}
+    | WHILE expr DO stmts END			{: return new While(expr, stmts); :}
+    | PRINT expr				{: return new Output(expr); :}
+    ;
+
+Expr expr =
+      operand			{: return operand; :}
+    | operand operator expr	{: return new BinOpSequence(operand, operator, expr); :}
+    ;
+
+Expr operand =
+    IDENTIFIER						{: return new ID(IDENTIFIER); :}
+    | INT_LITERAL					{: return new Number(INT_LITERAL); :}
+    | operand.target OBRACKET expr.index CBRACKET	{: return new Subscription(target, index); :}
+    | operand.callee OPAREN actuals CPAREN		{: return new Call(callee, actuals); :}
+    | OPAREN expr CPAREN				{: return expr; :}
+    ;
+
+Operator operator =
+      PLUS	{: return new AddOp(); :}
+    | GT	{: return new GTOp(); :}
+    | EQEQ	{: return new EqOp(); :}
+    | AND	{: return new AndOp(); :}
+    ;
+
+List actuals =
+      /* empty */ 	{: return new List(); :}
+    | actual_list	{: return actual_list; :}
+    ;
+
+List actual_list =
+      expr			{: return new List().add(expr); :}
+    | actual_list COMMA expr	{: return actual_list.add(expr); :}
+    ;
