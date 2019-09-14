@@ -1,6 +1,7 @@
 package AST;
 
 import AST.ProgramParser.Terminals; // Terminals are implicitly defined in the parser
+import mystery2020.LexerException;
 
 %%
 
@@ -72,3 +73,5 @@ DecimalNumeral = 0 | {NonZeroDigit} {Digits}?
 {Identifier}		{ return sym(Terminals.IDENTIFIER); }
 -?{DecimalNumeral}	{ return sym(Terminals.INT_LITERAL); }
 <<EOF>>			{ return sym(Terminals.EOF); }
+
+[^]			{ throw new LexerException(yyline + 1, yycolumn); }

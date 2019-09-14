@@ -1,10 +1,60 @@
 %header {:
   package AST; // already generated?
+  import mystery2020.ParserException;
+  import mystery2020.LexerException;
 :};
 
 %goal program;
 
 %embed {:
+    {
+	// custom event report handling
+	report = new Parser.Events() {
+	    @Override
+	    public void
+	    scannerError(Scanner.Exception e) {
+		throw new LexerException(e.line, e.column);
+	    }
+
+	    @Override
+	    public void
+	    syntaxError(Symbol token) {
+		// unexpected token
+		throw new ParserException(Symbol.getLine(token.getStart()),
+					  Symbol.getColumn(token.getStart()),
+					  Symbol.getLine(token.getEnd()),
+					  Symbol.getColumn(token.getEnd()));
+	    }
+
+	    @Override
+	    public void
+            unexpectedTokenRemoved(Symbol token) {
+		// parser could recover, but we're not allowing that
+		syntaxError(token);
+	    }
+
+	    @Override
+	    public void
+            missingTokenInserted(Symbol token) {
+		// parser could recover, but we're not allowing that
+		syntaxError(token);
+	    }
+
+	    @Override
+	    public void
+            misspelledTokenReplaced(Symbol token) {
+		// parser could recover, but we're not allowing that
+		syntaxError(token);
+	    }
+
+	    @Override
+	    public void
+            errorPhraseRemoved(Symbol error) {
+		// parser could recover, but we're not allowing that
+		syntaxError(error);
+	    }
+	};
+    }
 :};
 
 
