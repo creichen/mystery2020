@@ -1,12 +1,14 @@
 import mystery2020.runtime.*;
 import mystery2020.runtime.Runtime;
+import mystery2020.MType;
 
 /**
  * Statement execution
  */
 aspect Run {
     interface RunInterface {
-	void run(Runtime rt);
+	// returns non-null Value iff we hit a RETURN statement
+	Value run(Runtime rt);
     }
     Stmt implements RunInterface;
 
@@ -15,33 +17,58 @@ aspect Run {
 	this.getBlock().run(rt);
     }
 
-    public void
+    public Value
     Assignment.run(Runtime rt) {
+	rt.runStep();
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
-    public void
+    public Value
     Return.run(Runtime rt) {
+	rt.runStep();
+	return this.getExpr.eval(rt);
     }
 
-    public void
+    public Value
     Block.run(Runtime rt) {
+	rt.runStep();
+	for (Stmt stmt : this.getStmts()) {
+	    Value retval = stmt.run(rt);
+	    if (retval != null) {
+		return retval;
+	    }
+	}
     }
 
-    public void
+    public Value
     Conditional.run(Runtime rt) {
+	rt.runStep();
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
-    public void
+    public Value
     While.run(Runtime rt) {
+	rt.runStep();
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
-    public void
+    public Value
     Output.run(Runtime rt) {
+	rt.runStep();
+	Value v = this.getExpr().eval(rt);
+	if (v.getType().convertibleTo(MType.INTEGER)) {
+	    rt.addOutput(v.getVale().toString());
+	} else {
+	    rt.addOutput("?");
+	}
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
-    public void
+    public Value
     ExprStmt.run(Runtime rt) {
+	rt.runStep();
 	this.getExpr().eval(rt);
 	// ignore result
+	return null;
     }
 }

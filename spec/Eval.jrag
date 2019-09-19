@@ -1,5 +1,6 @@
 import mystery2020.runtime.*;
 import mystery2020.runtime.Runtime;
+import mystery2020.MType;
 
 /**
  * Expression evaluation
@@ -18,26 +19,32 @@ aspect Eval {
 
     public Value
     BinOp.eval(Runtime rt) {
-	return null;
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Number.eval(Runtime rt) {
-	return null;
+	try {
+	    Value v = new Value(MType.INTEGER, Integer.parseInt(this.getNumber()));
+	    return v;
+	} catch (NumberFormatException exn) {
+	    throw new IntLiteralException(Symbol.getLine(this.getStart()), Symbol.getColumn(this.getStart), this.getNumber());
+	}
     }
 
     public Value
     ID.eval(Runtime rt) {
-	return null;
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Subscription.eval(Runtime rt) {
-	return null;
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Call.eval(Runtime rt) {
-	return null;
+	rt.runCall();
+	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
     }
 }
