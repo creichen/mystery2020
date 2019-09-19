@@ -1,0 +1,47 @@
+import mystery2020.runtime.*;
+import mystery2020.runtime.Runtime;
+
+/**
+ * Statement execution
+ */
+aspect Run {
+    interface RunInterface {
+	void run(Runtime rt);
+    }
+    Stmt implements RunInterface;
+
+    public void
+    Program.run(Runtime rt) {
+	this.getBlock().run(rt);
+    }
+
+    public void
+    Assignment.run(Runtime rt) {
+    }
+
+    public void
+    Return.run(Runtime rt) {
+    }
+
+    public void
+    Block.run(Runtime rt) {
+    }
+
+    public void
+    Conditional.run(Runtime rt) {
+    }
+
+    public void
+    While.run(Runtime rt) {
+    }
+
+    public void
+    Output.run(Runtime rt) {
+    }
+
+    public void
+    ExprStmt.run(Runtime rt) {
+	this.getExpr().eval(rt);
+	// ignore result
+    }
+}

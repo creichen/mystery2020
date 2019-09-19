@@ -1,0 +1,14 @@
+import mystery2020.Configuration;
+
+aspect Configuration {
+    private Configuration Program.config = null;
+
+    public void
+    Program.setConfiguration(Configuration config) {
+	this.config = config;
+    }
+
+    eq Program.getBlock().config() = this.config;
+
+    inh Configuration ASTNode.config();
+}

@@ -1,0 +1,43 @@
+import mystery2020.runtime.*;
+import mystery2020.runtime.Runtime;
+
+/**
+ * Expression evaluation
+ */
+aspect Eval {
+
+    interface EvalInterface {
+	Value eval(Runtime rt);
+    }
+    Expr implements EvalInterface;
+
+    public Value
+    BinOpSequence.eval(Runtime rt) {
+	throw new RuntimeException("Not supported; should have been rewritten");
+    }
+
+    public Value
+    BinOp.eval(Runtime rt) {
+	return null;
+    }
+
+    public Value
+    Number.eval(Runtime rt) {
+	return null;
+    }
+
+    public Value
+    ID.eval(Runtime rt) {
+	return null;
+    }
+
+    public Value
+    Subscription.eval(Runtime rt) {
+	return null;
+    }
+
+    public Value
+    Call.eval(Runtime rt) {
+	return null;
+    }
+}
