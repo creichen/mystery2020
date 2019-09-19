@@ -3,14 +3,15 @@ import AST.*;
 
 import java.io.*;
 
-public class Compiler {
+public class Interpreter {
 
     public static void
     main(String[] args) throws FileNotFoundException {
         String filename = getFilename(args);
 
         // Construct the AST
-        Block m = parseFile(filename);
+        Program m = parseFile(filename);
+        m.setConfiguration(new Configuration());
         System.out.println(m.toString());
     }
 
@@ -23,7 +24,7 @@ public class Compiler {
         return args[0];
     }
 
-    public static Block
+    public static Program
     parseFile(String filename) throws FileNotFoundException {
     	try {
     		return parse(new FileReader(filename));
@@ -32,7 +33,7 @@ public class Compiler {
     	}
     }
 
-    public static Block
+    public static Program
     parseString(String body) {
     	return parse(new StringReader(body));
     }
@@ -44,12 +45,12 @@ public class Compiler {
      * @throw ParserException
      * @throw IOException
      */
-    public static Block
+    public static Program
     parse(Reader reader) {
     	ProgramScanner scanner = new ProgramScanner(reader);
     	ProgramParser parser = new ProgramParser();
     	try {
-    		Block result = (Block)parser.parse(scanner);
+    		Program result = (Program)parser.parse(scanner);
     		return result;
     	} catch (IOException exn) {
     		throw new IOFailureException(exn);

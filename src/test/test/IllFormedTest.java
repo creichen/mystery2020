@@ -4,18 +4,18 @@ import junit.framework.TestCase;
 import mystery2020.*;
 
 import AST.*;
-import mystery2020.Compiler;
+import mystery2020.Interpreter;
 
 public class IllFormedTest extends TestCase {
     public void
     testNoException() {
-    	Compiler.parseString("BEGIN END");
+    	Interpreter.parseString("BEGIN END");
     }
 
     public void
     testLexError() {
     	try {
-    		Compiler.parseString("BEGIN\n\n #&\n\n END");
+    		Interpreter.parseString("BEGIN\n\n #&\n\n END");
     		fail("No exn");
     	} catch (LexerException exn) {
     		assertEquals("LEXER 3", exn.toString());
@@ -25,7 +25,7 @@ public class IllFormedTest extends TestCase {
     public void
     testParserError() {
     	try {
-    		Compiler.parseString("\nBEGIN\n\n PRINT PRINT\n\n END");
+    		Interpreter.parseString("\nBEGIN\n\n PRINT PRINT\n\n END");
     		fail("No exn");
     	} catch (ParserException exn) {
     		assertEquals("PARSER 4", exn.toString());

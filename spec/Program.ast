@@ -1,3 +1,5 @@
+Program ::= Block ;
+
 abstract Decl;
 VarDecl		: Decl ::= <Name> Type ;
 TypeDecl	: Decl ::= <Name> Type ;

@@ -58,10 +58,10 @@
 :};
 
 
-block program =
-        block		{: return block; :}
-      | block SEMICOLON	{: return block; :}
-      ;
+Program program =
+      block		{: return new Program(block); :}
+    | block SEMICOLON	{: return new Program(block); :}
+    ;
 
 List decls =
       /* empty */	{: return new List(); :}
