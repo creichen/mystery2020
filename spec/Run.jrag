@@ -20,13 +20,13 @@ aspect Run {
     public Value
     Assignment.run(Runtime rt) {
 	rt.runStep();
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-1"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Return.run(Runtime rt) {
 	rt.runStep();
-	return this.getExpr.eval(rt);
+	return this.getExpr().eval(rt);
     }
 
     public Value
@@ -38,30 +38,31 @@ aspect Run {
 		return retval;
 	    }
 	}
+	return null;
     }
 
     public Value
     Conditional.run(Runtime rt) {
 	rt.runStep();
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-2"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     While.run(Runtime rt) {
 	rt.runStep();
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-3"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Output.run(Runtime rt) {
 	rt.runStep();
 	Value v = this.getExpr().eval(rt);
-	if (v.getType().convertibleTo(MType.INTEGER)) {
-	    rt.addOutput(v.getVale().toString());
+	if (v.getType().convertibleTo(MType.INTEGER, config())) {
+	    rt.addOutput(v.getValue().toString());
 	} else {
 	    rt.addOutput("?");
 	}
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	return null;
     }
 
     public Value

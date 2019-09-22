@@ -1,5 +1,7 @@
 import mystery2020.runtime.*;
 import mystery2020.runtime.Runtime;
+import beaver.Symbol;
+import mystery2020.IntLiteralException;
 import mystery2020.MType;
 
 /**
@@ -19,7 +21,7 @@ aspect Eval {
 
     public Value
     BinOp.eval(Runtime rt) {
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-5"); // !!!!!!!!!!!!!!!
     }
 
     public Value
@@ -28,23 +30,25 @@ aspect Eval {
 	    Value v = new Value(MType.INTEGER, Integer.parseInt(this.getNumber()));
 	    return v;
 	} catch (NumberFormatException exn) {
-	    throw new IntLiteralException(Symbol.getLine(this.getStart()), Symbol.getColumn(this.getStart), this.getNumber());
+	    throw new IntLiteralException(Symbol.getLine(this.getStart()),
+					  Symbol.getColumn(this.getStart()),
+					  this.getNumber());
 	}
     }
 
     public Value
     ID.eval(Runtime rt) {
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-6"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Subscription.eval(Runtime rt) {
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-7"); // !!!!!!!!!!!!!!!
     }
 
     public Value
     Call.eval(Runtime rt) {
 	rt.runCall();
-	throw new RuntimeException("FIXME"); // !!!!!!!!!!!!!!!
+	throw new RuntimeException("FIXME-8"); // !!!!!!!!!!!!!!!
     }
 }
