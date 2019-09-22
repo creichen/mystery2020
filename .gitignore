@@ -1,3 +1,9 @@
 /.gradle
 /build
 /GradleBuild-all.jar
+/.classpath
+/.project
+/.settings
+**/*~
+**/*#
+mystery2020-all.jar
