@@ -1,0 +1,17 @@
+import mystery2020.runtime.Value;
+
+// common auxiliary definitions
+aspect Auxiliary {
+    public int
+    ASTNode.line() {
+	return Symbol.getLine(this.getStart());
+    }
+
+    Value ASTNode.True() {
+	return Value.True(config());
+    }
+
+    Value ASTNode.False() {
+	return Value.False(config());
+    }
+}

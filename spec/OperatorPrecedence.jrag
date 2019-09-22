@@ -1,0 +1,39 @@
+import mystery2020.Configuration.Op;
+import mystery2020.PrecedenceParser;
+
+aspect OperatorPrecedence {
+    interface OperatorInterface {
+	public Op getOperator();
+    }
+    Operator implements OperatorInterface;
+
+    public Op
+    AddOp.getOperator() { return Op.ADD; }
+
+    public Op
+    AndOp.getOperator() { return Op.AND; }
+
+    public Op
+    EqOp.getOperator() { return Op.EQ; }
+
+    public Op
+    GTOp.getOperator() { return Op.GT; }
+
+    public static BinOp
+    BinOp.make(Expr lhs, Operator op, Expr rhs) {
+	return new BinOp(lhs, op, rhs);
+    }
+
+    eq Program.getBlock().precedenceParser() {
+	return new PrecedenceParser(config.getOpConfig());
+    }
+
+    inh PrecedenceParser Expr.precedenceParser();
+
+    rewrite BinOpSequence {
+	when (!PrecedenceParser.testMode)
+	to Expr {
+	    return precedenceParser().parse(this);
+	}
+    }
+}

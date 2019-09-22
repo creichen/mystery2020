@@ -1,0 +1,53 @@
+plugins {
+  id 'java'
+  id 'maven'
+  id 'org.jastadd' version '1.13.0'
+}
+
+jastadd {
+  configureModuleBuild()
+
+  modules "jastadd_modules"
+  module = "mystery2020"
+
+  astPackage = "AST"
+  parser.name = "ProgramParser"
+}
+
+sourceSets {
+  test {
+    java {
+      srcDir 'src/test'
+    }
+  }
+}
+
+dependencies {
+  compile 'junit:junit:3.8.1'
+  compile 'net.sf.beaver:beaver-rt:0.9.11'
+}
+
+test {
+  include 'test/**'
+  testLogging {
+    events 'passed', 'failed'
+    showExceptions = true
+    showStackTraces = true
+    exceptionFormat = 'full'
+  }
+}
+
+// http://stackoverflow.com/questions/4871656/using-gradle-to-build-a-jar-with-dependencies
+task jarAll(type: Jar) {
+  destinationDir = projectDir
+  manifest.attributes 'Main-Class': 'mystery2020.Interpreter'
+  baseName = "${project.name}-all"
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  with jar
+}
+
+clean.dependsOn 'cleanJarAll'
+
+task cleanJarAll(type: Delete) {
+  delete jarAll.outputs.files
+}

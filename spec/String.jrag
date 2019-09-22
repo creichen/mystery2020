@@ -1,0 +1,95 @@
+aspect String {
+    // ========================================
+    // Expr
+
+    public String
+    BinOpSequence.toString() {
+	StringBuffer result = new StringBuffer("<<");
+
+	Expr b = this;
+	while (b instanceof BinOpSequence) {
+	    BinOpSequence bos = (BinOpSequence) b;
+	    result.append(bos.getLHS().toString());
+	    result.append(" ");
+	    result.append(bos.getOperator().toString());
+	    result.append(" ");
+	    b = bos.getRHS();
+	}
+	result.append(b.toString());
+	result.append(">>");
+	return result.toString();
+    }
+
+    public String
+    BinOp.toString() {
+	return "("
+	    + this.getLHS().toString()
+	    + " "
+	    + this.getOperator().toString()
+	    + " "
+	    + this.getRHS().toString()
+	    + ")";
+    }
+
+    public String
+    Number.toString() {
+	return this.getNumber();
+    }
+
+    public String
+    ID.toString() {
+	return this.getName();
+    }
+
+    public String
+    Subscription.toString() {
+	return this.getTarget().toString()
+	    + "["
+	    + this.getIndex().toString()
+	    + "]";
+    }
+
+    public String
+    Call.toString() {
+	StringBuffer args = new StringBuffer();
+
+	boolean first = true;
+
+	for (Expr arg : this.getActuals()) {
+	    if (!first) {
+		args.append(", ");
+	    } else {
+		first = false;
+	    }
+	    args.append(arg.toString());
+	}
+
+	return this.getCallee().toString()
+	    + "("
+	    + args.toString()
+	    + ")";
+    }
+
+    // ========================================
+    // Operator
+
+    public String
+    AddOp.toString() {
+	return "+";
+    }
+
+    public String
+    EqOp.toString() {
+	return "==";
+    }
+
+    public String
+    GTOp.toString() {
+	return ">";
+    }
+
+    public String
+    AndOp.toString() {
+	return "AND";
+    }
+}
