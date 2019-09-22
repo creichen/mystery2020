@@ -44,7 +44,20 @@ aspect Run {
     public Value
     Conditional.run(Runtime rt) {
 	rt.runStep();
-	throw new RuntimeException("FIXME-2"); // !!!!!!!!!!!!!!!
+	Value cond_val = this.getCond().eval(rt);
+	List<Stmt> statements;
+	if (cond_val.getValue().equals(0)) {
+	    statements = this.getFalseBranchStmts();
+	} else {
+	    statements =  this.getTrueBranchStmts();
+	}
+	for (Stmt stmt : statements) {
+	    Value retval = stmt.run(rt);
+	    if (retval != null) {
+		return retval;
+	    }
+	}
+	return null;
     }
 
     public Value

@@ -20,7 +20,7 @@ abstract Stmt;
 Assignment	: Stmt ::= LHS:Expr RHS:Expr;
 Return		: Stmt ::= Expr;
 Block		: Stmt ::= Decl* Stmt* ;
-Conditional	: Stmt ::= Cond:Expr TrueBranch:Stmt* FalseBranch:Stmt*;
+Conditional	: Stmt ::= Cond:Expr TrueBranchStmt:Stmt* FalseBranchStmt:Stmt*;
 While		: Stmt ::= Cond:Expr Body:Stmt*;
 Output		: Stmt ::= Expr;
 ExprStmt	: Stmt ::= Expr;
