@@ -6,6 +6,32 @@ import java.util.function.BiConsumer;
 
 public class Configuration {
 	
+	// ====================
+	// operators
+	
+	public enum Op {
+		ADD,
+		AND,
+		EQ,
+		GT
+	}
+	
+	private Map<Op, OpConfig> op_config = new HashMap<>();
+	{
+		this.op_config.put(Op.ADD, new OpConfig(3, OpConfig.Associativity.RIGHT));
+		this.op_config.put(Op.GT,  new OpConfig(2, OpConfig.Associativity.NONE));
+		this.op_config.put(Op.EQ,  new OpConfig(1, OpConfig.Associativity.NONE));
+		this.op_config.put(Op.AND, new OpConfig(0, OpConfig.Associativity.RIGHT));
+	}
+	
+	public Map<Op, OpConfig>
+	getOpConfig() {
+		return this.op_config;
+	}
+	
+	// ====================
+	// other configuration
+	
 	public interface ConfigOption {
 		/**
 		 * @return Unique key (within this configuration option) for identifying this option 

@@ -8,14 +8,9 @@ public class ParserException extends StaticException {
 	private int column_start, column_end;
 
 	public ParserException(int line_start, int column_start, int line_end, int column_end) {
-		this.line_start = line_start;
+		super(line_start, "PARSER", "");
 		this.line_end= line_end;
 		this.column_start = column_start;
 		this.column_end= column_end;
-	}
-	
-	public String
-	toString() {
-		return "PARSER " +  this.line_start;
 	}
 }

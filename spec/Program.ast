@@ -31,7 +31,7 @@ BinOp		: Expr ::= LHS:Expr Operator RHS:Expr ;
 Number		: Expr ::= <Number> ;
 ID		: Expr ::= <Name> ;
 Subscription	: Expr ::= Target:Expr Index:Expr ;
-Call		: Expr ::= Callee:Expr Actuals:Expr* ;
+Call		: Expr ::= Callee:Expr Actual:Expr* ;
 
 abstract Operator;
 AddOp	: Operator;

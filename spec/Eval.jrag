@@ -14,14 +14,14 @@ aspect Eval {
     }
     Expr implements EvalInterface;
 
+    interface BinEvalInterface {
+	Value bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt);
+    }
+    Operator implements BinEvalInterface;
+
     public Value
     BinOpSequence.eval(Runtime rt) {
 	throw new RuntimeException("Not supported; should have been rewritten");
-    }
-
-    public Value
-    BinOp.eval(Runtime rt) {
-	throw new RuntimeException("FIXME-5"); // !!!!!!!!!!!!!!!
     }
 
     public Value
@@ -30,7 +30,7 @@ aspect Eval {
 	    Value v = new Value(MType.INTEGER, Integer.parseInt(this.getNumber()));
 	    return v;
 	} catch (NumberFormatException exn) {
-	    throw new IntLiteralException(Symbol.getLine(this.getStart()),
+	    throw new IntLiteralException(line(),
 					  Symbol.getColumn(this.getStart()),
 					  this.getNumber());
 	}
@@ -50,5 +50,60 @@ aspect Eval {
     Call.eval(Runtime rt) {
 	rt.runCall();
 	throw new RuntimeException("FIXME-8"); // !!!!!!!!!!!!!!!
+    }
+
+    public Value
+    BinOp.eval(Runtime rt) {
+	Value result = this.getOperator().bin_eval(this.getLHS().eval(rt),
+						   this.getRHS(),
+						   rt);
+	return result;
+    }
+
+    public Value
+    AddOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
+	long lhs_v = lhs.getInt(line());
+	long rhs_v = rhs_closure.eval(rt).getInt(line());
+	long result = lhs_v + rhs_v;
+	int result_int = (int) result;
+	if (result != result_int) {
+	    // FIXME: optional error handling
+	}
+	return new Value(MType.INTEGER, result_int);
+    }
+
+    public Value
+    GTOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
+	int lhs_v = lhs.getInt(line());
+	int rhs_v = rhs_closure.eval(rt).getInt(line());
+	if (lhs_v > rhs_v) {
+	    return True();
+	}
+	return False();
+    }
+
+    public Value
+    EqOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
+	if (lhs.equalTo(rhs_closure.eval(rt), config())) {
+	    return True();
+	}
+	return False();
+
+    }
+
+    public Value
+    AndOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
+	int lhs_v = lhs.getInt(line());
+
+	if (0 != lhs_v) {
+	    // fixme: extract this one strictly if appropriate
+	    int rhs_v = rhs_closure.eval(rt).getInt(line());
+
+	    if (0 != rhs_v) {
+		return True();
+	    }
+	}
+
+	return False();
     }
 }

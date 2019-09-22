@@ -2,6 +2,7 @@ package mystery2020.runtime;
 
 import mystery2020.Configuration;
 import mystery2020.MType;
+import mystery2020.TypeException;
 
 public class Value {
 	private MType type;
@@ -24,6 +25,30 @@ public class Value {
 	getValue() {
 		return this.value;
 	}
+
+	/**
+	 * Retrieves int without type checking
+	 * 
+	 * @param line_nr Line number, for error reporting
+	 * @return int interpretation, or a DynamicTypeError on failure
+	 */
+	public int
+	getInt(int line_nr) {
+		if (this.value instanceof Integer) {
+			return (Integer) this.value;
+		}
+		throw new TypeException(line_nr, "Non-int (" + this.type.toString() + ") to int");
+	}
+	
+	public static Value
+	True(Configuration cfg) {
+		return new Value(MType.INTEGER, 1);
+	}
+	
+	public static Value
+	False(Configuration cfg) {
+		return new Value(MType.INTEGER, 0);
+	}
 	
 	public boolean
 	equalTo(Object other, Configuration config) {
@@ -32,5 +57,11 @@ public class Value {
 			return this.getType().equalTo(v.getType(), config) && this.getType().valueEquals(this.getValue(), v.getValue(), config);
 		}
 		return false;
+	}
+	
+	@Override
+	public String
+	toString() {
+		return this.value + ":" + this.type;
 	}
 }

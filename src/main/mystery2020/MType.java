@@ -22,7 +22,7 @@ public interface MType {
 	valueEquals(Object v1, Object v2, Configuration config) {
 		return v1.equals(v2);
 	}
-	
+
 	public static MType INTEGER = new MType() {
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
