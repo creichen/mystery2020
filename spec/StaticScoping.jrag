@@ -16,12 +16,16 @@ aspect StaticScoping {
 	when firstAmbiguousName() != null
 	to Program.nameErrors();
 
+    ID contributes (new NameException(line(), "Name not found: " + getName()))
+	when declaration() == null
+	to Program.nameErrors();
+
     static String
     Block.findAmbiguousParameterName(AbstractBlock block) {
 	HashSet<String> names = new HashSet<>();
 	for (Decl decl : block.getDecls()) {
 	    String name = decl.name();
-	    // FIXME: for now, everything uses the same namespace
+	    // FIXME: for now, everything always uses the same namespace
 	    if (names.contains(name)) {
 		return name;
 	    }
@@ -68,37 +72,34 @@ aspect StaticScoping {
     eq TypeDecl.name() = getName();
     eq ProcDecl.name() = getName();
 
-    // eq ProcDecl.lookupStatic(String name) {
-    // 	Decl match = null;
-    // 	for (VarDecl decl : int i = 0; i < this.getNumFormal(); i++) {
-    // 	    if (decl.name().equals(name)) {
-    // 		if (match != null) {
-    // 		    throw new AmbiguousNameException(line());
-    // 		}
-    // 		match = decl;
-    // 	    }
-    // 	}
-    // 	if (match != null) {
-    // 	    return match;
-    // 	}
-    // 	return parent.lookupStatic(name);
-    // }
+    syn Decl ID.declaration() {
+	return lookupStatic(this.getName());
+    }
 
-    // eq Block.lookupStatic(String name) {
-    // 	Decl match = null;
-    // 	for (VarDecl decl : int i = 0; i < this.getNumFormal(); i++) {
-    // 	    if (decl.name().equals(name)) {
-    // 		if (match != null) {
-    // 		    throw new AmbiguousNameException();
-    // 		}
-    // 		match = decl;
-    // 	    }
-    // 	}
-    // 	if (match != null) {
-    // 	    return match;
-    // 	}
-    // 	return parent.lookupStatic(name);
-    // }
+    inh Decl AbstractBlock.lookupStatic(String name);
+    inh Decl ID.lookupStatic(String name);
 
-    // inh Decl lookupStatic(String name);
+    eq Program.getBody().lookupStatic(String name) {
+	return null;
+    }
+
+    eq ProcDecl.getBody().lookupStatic(String name) {
+    	for (VarDecl decl : this.getDecls()) {
+    	    if (decl.name().equals(name)) {
+		return decl;
+	    }
+    	}
+	System.err.println(parent.getClass());
+    	return lookupStatic(name);
+    }
+
+    eq Block.getStmt().lookupStatic(String name) {
+    	for (Decl decl : this.getDecls()) {
+	    // FIXME: once we support multiple scopes, separate by type
+    	    if (decl.name().equals(name)) {
+		return decl;
+	    }
+    	}
+    	return lookupStatic(name);
+    }
 }

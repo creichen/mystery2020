@@ -24,7 +24,7 @@ aspect OperatorPrecedence {
 	return new BinOp(lhs, op, rhs);
     }
 
-    eq Program.getBlock().precedenceParser() {
+    eq Program.getBody().precedenceParser() {
 	return new PrecedenceParser(config.getOpConfig());
     }
 

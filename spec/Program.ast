@@ -1,9 +1,9 @@
-Program ::= Block ;
+Program ::= Body:Block ;
 
 abstract Decl;
 VarDecl		: Decl ::= <Name> Type ;
 TypeDecl	: Decl ::= <Name> Type ;
-ProcDecl	: Decl ::= <Name> Decl:VarDecl* Type Block ;
+ProcDecl	: Decl ::= <Name> Decl:VarDecl* Type Body:Block ;
 
 Subrange	::= <Lower> <Upper> ;
 

@@ -8,7 +8,7 @@ aspect Configuration {
 	this.config = config;
     }
 
-    eq Program.getBlock().config() = this.config;
+    eq Program.getBody().config() = this.config;
 
     inh Configuration ASTNode.config();
 }

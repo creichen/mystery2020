@@ -17,7 +17,7 @@ aspect Run {
 	if (this.staticErrors()) { // will throw exception
 	    return;
 	}
-	this.getBlock().run(rt);
+	this.getBody().run(rt);
     }
 
     public Value
