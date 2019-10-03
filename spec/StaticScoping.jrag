@@ -1,0 +1,104 @@
+import java.util.HashSet;
+import java.util.LinkedList;
+import mystery2020.NameException;
+
+aspect StaticScoping {
+    // ========================================
+    // Name errors
+
+    coll LinkedList<NameException> Program.nameErrors();
+
+    Block contributes (new NameException(line(), "Ambiguous variable name: " + firstAmbiguousName()))
+	when firstAmbiguousName() != null
+	to Program.nameErrors();
+
+    ProcDecl contributes (new NameException(line(), "Ambiguous formal parameter name: " + firstAmbiguousName()))
+	when firstAmbiguousName() != null
+	to Program.nameErrors();
+
+    static String
+    Block.findAmbiguousParameterName(AbstractBlock block) {
+	HashSet<String> names = new HashSet<>();
+	for (Decl decl : block.getDecls()) {
+	    String name = decl.name();
+	    // FIXME: for now, everything uses the same namespace
+	    if (names.contains(name)) {
+		return name;
+	    }
+	    names.add(name);
+	}
+	return null;
+    }
+
+    syn String ProcDecl.firstAmbiguousName() = Block.findAmbiguousParameterName(this);
+    syn String Block.firstAmbiguousName() = Block.findAmbiguousParameterName(this);
+
+    // ========================================
+    // Vardecls and their immediate owners
+
+    interface AbstractBlock {
+	/**
+	 * Whether this block represents a function argument list
+	 */
+	public boolean isArgs();
+
+	public List<? extends Decl> getDecls();
+    }
+    ProcDecl implements AbstractBlock;
+    Block implements AbstractBlock;
+
+    public boolean ProcDecl.isArgs() { return true; }
+    public boolean Block.isArgs() { return false; }
+
+    inh int Decl.index();
+    eq ProcDecl.getDecl(int index).index() = index;
+    eq Block.getDecl(int index).index() = index;
+    eq Call.getActual(int index).index() = index;
+
+    // ========================================
+    // Looking up Name Uses
+
+    interface Named {
+	public String name();
+    }
+    Decl implements Named;
+
+    syn String Decl.name();
+    eq VarDecl.name() = getName();
+    eq TypeDecl.name() = getName();
+    eq ProcDecl.name() = getName();
+
+    // eq ProcDecl.lookupStatic(String name) {
+    // 	Decl match = null;
+    // 	for (VarDecl decl : int i = 0; i < this.getNumFormal(); i++) {
+    // 	    if (decl.name().equals(name)) {
+    // 		if (match != null) {
+    // 		    throw new AmbiguousNameException(line());
+    // 		}
+    // 		match = decl;
+    // 	    }
+    // 	}
+    // 	if (match != null) {
+    // 	    return match;
+    // 	}
+    // 	return parent.lookupStatic(name);
+    // }
+
+    // eq Block.lookupStatic(String name) {
+    // 	Decl match = null;
+    // 	for (VarDecl decl : int i = 0; i < this.getNumFormal(); i++) {
+    // 	    if (decl.name().equals(name)) {
+    // 		if (match != null) {
+    // 		    throw new AmbiguousNameException();
+    // 		}
+    // 		match = decl;
+    // 	    }
+    // 	}
+    // 	if (match != null) {
+    // 	    return match;
+    // 	}
+    // 	return parent.lookupStatic(name);
+    // }
+
+    // inh Decl lookupStatic(String name);
+}

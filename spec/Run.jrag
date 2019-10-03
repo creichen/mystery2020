@@ -14,6 +14,9 @@ aspect Run {
 
     public void
     Program.run(Runtime rt) {
+	if (this.staticErrors()) { // will throw exception
+	    return;
+	}
 	this.getBlock().run(rt);
     }
 

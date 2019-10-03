@@ -98,4 +98,21 @@ public class BasicEvalTest extends EvaluationTest {
 				"PRINT 0 AND 1",
 				"0");
 	}
+/*
+	public void
+	testBasicVar() {
+		forallConfigurationsTestOutput(
+				"VAR x : INTEGER\n" +
+				"BEGIN x := 7; PRINT x END",
+				"7");
+	}
+
+	public void
+	testTwoVar() {
+		forallConfigurationsTestOutput(
+				"VAR x : INTEGER;\n" +
+				"VAR y : INTEGER\n" +
+				"BEGIN x := 7; y := 6; PRINT y; PRINT y + x END",
+				"6", "13");
+	}*/
 }

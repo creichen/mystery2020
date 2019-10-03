@@ -81,7 +81,7 @@ Decl decl =
     ;
 
 Type opt_type =
-      /* empty */		{: return null; :}
+      /* empty */		{: return new UnknownType(); :}
     | COLON type		{: return type; :}
     ;
 
@@ -95,8 +95,8 @@ List formal_list =
     | formal_list COMMA formal	{: return formal_list.add(formal); :}
     ;
 
-Formal formal =
-      IDENTIFIER opt_type	{: return new Formal(IDENTIFIER, opt_type); :}
+VarDecl formal =
+      IDENTIFIER opt_type	{: return new VarDecl(IDENTIFIER, opt_type); :}
     ;
 
 Type type =

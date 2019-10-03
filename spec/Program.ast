@@ -3,18 +3,18 @@ Program ::= Block ;
 abstract Decl;
 VarDecl		: Decl ::= <Name> Type ;
 TypeDecl	: Decl ::= <Name> Type ;
-ProcDecl	: Decl ::= <Name> Formal* Type Block ;
+ProcDecl	: Decl ::= <Name> Decl:VarDecl* Type Block ;
 
-Formal		::= <Name> Type ;
 Subrange	::= <Lower> <Upper> ;
 
 abstract Type;
+UnknownType	: Type; // used to mark lack of type decl
 IntType		: Type;
 UnitType	: Type;
 SubrangeType	: Type ::= Subrange ;
 ArrayType	: Type ::= Subrange ElementType:Type ;
 NamedType	: Type ::= <Name> ;
-ProcType	: Type ::= Formal* Type ;
+ProcType	: Type ::= Formal:VarDecl* Type ;
 
 abstract Stmt;
 Assignment	: Stmt ::= LHS:Expr RHS:Expr;

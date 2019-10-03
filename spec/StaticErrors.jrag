@@ -1,0 +1,12 @@
+/**
+ * Central aspect for triggering (or omitting) static analyses
+ */
+aspect StaticErrors {
+
+    boolean Program.staticErrors() {
+	if (!nameErrors().isEmpty()) {
+	    throw nameErrors().get(0);
+	}
+	return false;
+    }
+}
