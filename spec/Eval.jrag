@@ -1,4 +1,3 @@
-import mystery2020.runtime.*;
 import mystery2020.runtime.Runtime;
 import beaver.Symbol;
 import mystery2020.IntLiteralException;
@@ -12,12 +11,29 @@ aspect Eval {
     interface EvalInterface {
 	Value eval(Runtime rt);
     }
-    Expr implements EvalInterface;
 
-    interface BinEvalInterface {
-	Value bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt);
+    // ========================================
+    // Declaration to value conversion
+    Decl implements EvalInterface;
+
+    public Value
+    VarDecl.eval(Runtime rt) {
+	return this.variable(rt).getValue();
     }
-    Operator implements BinEvalInterface;
+
+    public Value
+    TypeDecl.eval(Runtime rt) {
+	throw new mystery2020.InvalidVariableKindException(line(), "Trying to use type as a value: " + this.getName());
+    }
+
+    public Value
+    ProcDecl.eval(Runtime rt) {
+	throw new RuntimeException("FIXME-11"); // !!!!!!!!!!!!!!!
+    }
+
+    // ========================================
+    // Expression evaluation
+    Expr implements EvalInterface;
 
     public Value
     BinOpSequence.eval(Runtime rt) {
@@ -38,7 +54,7 @@ aspect Eval {
 
     public Value
     ID.eval(Runtime rt) {
-	throw new RuntimeException("FIXME-6"); // !!!!!!!!!!!!!!!
+	return rt.getDeclaration(this).eval(rt);
     }
 
     public Value
@@ -51,6 +67,14 @@ aspect Eval {
 	rt.runCall();
 	throw new RuntimeException("FIXME-8"); // !!!!!!!!!!!!!!!
     }
+
+    // ========================================
+    // Binary operator evaluation
+    interface BinEvalInterface {
+	Value bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt);
+    }
+    Operator implements BinEvalInterface;
+
 
     public Value
     BinOp.eval(Runtime rt) {

@@ -1,3 +1,4 @@
+import mystery2020.InvalidVariableKindException;
 import mystery2020.runtime.*;
 import mystery2020.runtime.Runtime;
 import mystery2020.MType;
@@ -23,7 +24,11 @@ aspect Run {
     public Value
     Assignment.run(Runtime rt) {
 	rt.runStep();
-	throw new RuntimeException("FIXME-1"); // !!!!!!!!!!!!!!!
+	if (!this.getLHS().isVariable()) {
+	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
+	}
+	this.getLHS().variable(rt).setValue(this.getRHS().eval(rt));
+	return null;
     }
 
     public Value
@@ -35,12 +40,14 @@ aspect Run {
     public Value
     Block.run(Runtime rt) {
 	rt.runStep();
+	rt.getStack().push(this.variableVector().instantiate());
 	for (Stmt stmt : this.getStmts()) {
 	    Value retval = stmt.run(rt);
 	    if (retval != null) {
 		return retval;
 	    }
 	}
+	rt.getStack().pop();
 	return null;
     }
 

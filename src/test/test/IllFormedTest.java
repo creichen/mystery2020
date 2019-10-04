@@ -3,7 +3,6 @@ package test;
 import junit.framework.TestCase;
 import mystery2020.*;
 
-import AST.*;
 import mystery2020.Interpreter;
 
 public class IllFormedTest extends TestCase {

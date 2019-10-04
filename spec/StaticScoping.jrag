@@ -1,8 +1,34 @@
 import java.util.HashSet;
 import java.util.LinkedList;
 import mystery2020.NameException;
+import mystery2020.runtime.VariableVector;
 
 aspect StaticScoping {
+    // ========================================
+    // Variable name propagation and collection
+
+    /**
+     * Example:
+     *   VarDecl x
+     *   TypeDecl ...
+     *   VarDecl y
+     * will give
+     *   [0, -1, 1]
+     */
+    int[]
+    Block.variableStorageIndexVector() {
+	int[] vec = new int[this.getNumDecl()];
+	int next_var_index = 0;
+	for (int i = 0; i < this.getNumDecl(); i++) {
+	    if (this.getDecl(i).isVariable()) {
+		vec[i] = next_var_index++;
+	    } else {
+		vec[i] = -1;
+	    }
+	}
+	return vec;
+    }
+
     // ========================================
     // Name errors
 
@@ -17,7 +43,7 @@ aspect StaticScoping {
 	to Program.nameErrors();
 
     ID contributes (new NameException(line(), "Name not found: " + getName()))
-	when declaration() == null
+	when staticDeclaration() == null
 	to Program.nameErrors();
 
     static String
@@ -47,6 +73,11 @@ aspect StaticScoping {
 	public boolean isArgs();
 
 	public List<? extends Decl> getDecls();
+
+	// /**
+	//  * How deeply nested is this block (starting at 0)?
+	//  */
+	// public int staticNestingDepth();
     }
     ProcDecl implements AbstractBlock;
     Block implements AbstractBlock;
@@ -54,10 +85,55 @@ aspect StaticScoping {
     public boolean ProcDecl.isArgs() { return true; }
     public boolean Block.isArgs() { return false; }
 
+    syn int ProcDecl.getVariablesNr() {
+	return this.getNumDecl();
+    }
+    syn int Block.getVariablesNr() {
+	int[] args = variableStorageIndexVector();
+	for (int i = args.length - 1; i >= 0; --i) {
+	    if (args[i] >= 0) {
+		return args[i] + 1;
+	    }
+	}
+	return 0;
+    }
+
+
     inh int Decl.index();
     eq ProcDecl.getDecl(int index).index() = index;
     eq Block.getDecl(int index).index() = index;
     eq Call.getActual(int index).index() = index;
+
+    inh int AbstractBlock.staticNestingDepth();
+    eq Program.getBody().staticNestingDepth() = 0;
+    eq ProcDecl.getBody().staticNestingDepth() = staticNestingDepth() + 1;
+    eq Block.getStmt(int index).staticNestingDepth() = staticNestingDepth() + 1;
+
+    inh int VarDecl.accessDepth();
+    eq ProcDecl.getDecl().accessDepth() = staticNestingDepth();
+    eq Block.getDecl().accessDepth() = staticNestingDepth();
+
+    inh int VarDecl.accessIndex();
+    eq Block.getDecl(int index).accessIndex() = variableStorageIndexVector()[index];
+    eq ProcDecl.getDecl(int index).accessIndex() = index;
+
+    // ========================================
+    // Abstract variable vectors (used for stack initialisation)
+
+    syn VariableVector AbstractBlock.variableVector() {
+	Variable[] vars = new Variable[this.getVariablesNr()];
+
+	int index = 0;
+
+	for (Decl decl : this.getDecls()) {
+	    if (decl.isVariable()) {
+		VarDecl vdecl = (VarDecl) decl;
+		Variable v = new Variable(vdecl.getMType(), vdecl.getName());
+		vars[index++] = v;
+	    }
+	}
+	return new VariableVector(vars);
+    }
 
     // ========================================
     // Looking up Name Uses
@@ -72,7 +148,7 @@ aspect StaticScoping {
     eq TypeDecl.name() = getName();
     eq ProcDecl.name() = getName();
 
-    syn Decl ID.declaration() {
+    syn Decl ID.staticDeclaration() {
 	return lookupStatic(this.getName());
     }
 

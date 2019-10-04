@@ -29,9 +29,9 @@ abstract Expr;
 BinOpSequence	: Expr ::= LHS:Expr Operator RHS:Expr ; // defer precedence parsing to semantic analysis (Operator, RHS optional)
 BinOp		: Expr ::= LHS:Expr Operator RHS:Expr ;
 Number		: Expr ::= <Number> ;
+Call		: Expr ::= Callee:Expr Actual:Expr* ;
 ID		: Expr ::= <Name> ;
 Subscription	: Expr ::= Target:Expr Index:Expr ;
-Call		: Expr ::= Callee:Expr Actual:Expr* ;
 
 abstract Operator;
 AddOp	: Operator;

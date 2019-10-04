@@ -1,0 +1,27 @@
+import mystery2020.MType;
+import mystery2020.MinMax;
+
+/**
+ * General type assignment (independent of specific typing schemes)
+ */
+aspect Typing {
+
+    syn MinMax Subrange.getMinMax() {
+	return new MinMax(line(), Symbol.getColumn(this.getStart()),
+			  MType.parseInt(line(), column(), this.getLower()),
+			  MType.parseInt(line(), column(), this.getUpper()));
+    }
+
+    syn MType Type.getMType();
+
+    eq UnknownType.getMType() = MType.ANY;
+    eq IntType.getMType() = MType.INTEGER;
+    eq SubrangeType.getMType() = MType.SUBRANGE(getSubrange().getMinMax());
+    eq ArrayType.getMType() { throw new RuntimeException("Unsupported"); }
+    eq NamedType.getMType() { throw new RuntimeException("Unsupported"); }
+    eq ProcType.getMType() { throw new RuntimeException("Unsupported"); }
+    eq UnitType.getMType() { throw new RuntimeException("Unsupported"); }
+
+    syn MType VarDecl.getMType();
+    eq VarDecl.getMType() = getType().getMType();
+}

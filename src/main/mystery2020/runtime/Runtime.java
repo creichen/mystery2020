@@ -3,6 +3,10 @@ package mystery2020.runtime;
 import java.util.ArrayList;
 import java.util.List;
 
+import AST.Decl;
+import AST.ID;
+import AST.VarDecl;
+
 /**
  * Aggregated runtime information
  *  
@@ -11,8 +15,14 @@ import java.util.List;
  */
 public class Runtime {
 	public ArrayList<String> output = new ArrayList<>();
+	public VariableStack stack = VariableStack.createEmpty();
 	
 	public Runtime() {
+	}
+	
+	public VariableStack
+	getStack() {
+		return this.stack;
 	}
 	
 	/**
@@ -42,4 +52,17 @@ public class Runtime {
 	getOutput() {
 		return this.output;
 	}
+	
+	public Decl
+	getDeclaration(ID id) {
+		// FIXME: static scoping only for now
+		return id.staticDeclaration();
+	}
+	
+	public Variable
+	getVariable(VarDecl var) {
+		// FIXME: static scoping only for now
+		return this.getStack().getVariable(var.accessDepth(), var.accessIndex());
+	}
+	
 }

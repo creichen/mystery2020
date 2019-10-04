@@ -1,5 +1,7 @@
 package mystery2020;
 
+import mystery2020.runtime.Value;
+
 public interface MType {
 	/**
 	 * Check whether the other type can be widened to this type
@@ -23,6 +25,31 @@ public interface MType {
 		return v1.equals(v2);
 	}
 
+	public Value getDefaultValue();
+	
+	public static MType ANY = new MType() {
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			return true;
+		}
+
+		@Override
+		public boolean equalTo(MType other, Configuration config) {
+			return other == this;
+		}
+		
+		@Override
+		public String
+		toString() {
+			return "Any";
+		}
+
+		@Override
+		public Value getDefaultValue() {
+			return Value.NOTHING;
+		}
+	};
+
 	public static MType INTEGER = new MType() {
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
@@ -40,12 +67,17 @@ public interface MType {
 		toString() {
 			return "Integer";
 		}
+		
+		@Override
+		public Value getDefaultValue() {
+			return new Value(ANY, 0);
+		}
 	};
 	
-	static class IntervalType implements MType {
+	static class SubrangeType implements MType {
 		private int min, max;
 
-		public IntervalType(int min, int max) {
+		public SubrangeType(int min, int max) {
 			this.min = min;
 			this.max = max;
 		}
@@ -59,8 +91,8 @@ public interface MType {
 
 		@Override
 		public boolean equalTo(MType other, Configuration config) {
-			if (other instanceof IntervalType) {
-				IntervalType other_interval = (IntervalType) other;
+			if (other instanceof SubrangeType) {
+				SubrangeType other_interval = (SubrangeType) other;
 				return other_interval.min == this.min && other_interval.max == this.max;
 			}
 			return false;
@@ -71,9 +103,23 @@ public interface MType {
 		toString() {
 			return "[" + this.min + " TO " + this.max + "]";
 		}
+		
+		@Override
+		public Value getDefaultValue() {
+			return new Value(ANY, this.min);
+		}
 	}
 	
-	public static MType INTERVAL(final int min, final int max) {
-		return new IntervalType(min, max);
+	public static MType SUBRANGE(final MinMax minmax) {
+		return new SubrangeType(minmax.getMin(), minmax.getMax());
+	}
+	
+	public static int
+	parseInt(int line, int column, String number) {
+		try {
+			return Integer.parseInt(number);
+		} catch (NumberFormatException exn) {
+			throw new IntLiteralException(line, column, number);
+		}
 	}
 }

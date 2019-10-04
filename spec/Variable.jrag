@@ -1,0 +1,45 @@
+import mystery2020.runtime.Runtime;
+import mystery2020.runtime.Variable;
+
+/**
+ * Derive variables (LValues) for suitable expressions
+ */
+aspect Variable {
+    interface VariableInterface {
+	Variable variable(Runtime rt);
+
+	boolean isVariable();
+    }
+    Expr implements VariableInterface;
+    Decl implements VariableInterface;
+
+    public boolean TypeDecl.isVariable()	{ return false; }
+    public boolean ProcDecl.isVariable()	{ return false; }
+    public boolean VarDecl.isVariable()		{ return true; }
+
+    public Variable TypeDecl.variable(Runtime rt)	{ return null; }
+    public Variable ProcDecl.variable(Runtime rt)	{ return null; }
+    public Variable VarDecl.variable(Runtime rt) {
+	return rt.getVariable(this);
+    }
+
+
+    public boolean BinOpSequence.isVariable()	{ return false; }
+    public boolean BinOp.isVariable()		{ return false; }
+    public boolean Number.isVariable()		{ return false; }
+    public boolean Call.isVariable()		{ return false; }
+    public boolean ID.isVariable()		{ return true; }
+    public boolean Subscription.isVariable()	{ return true; }
+
+    public Variable BinOpSequence.variable(Runtime rt)	{ return null; }
+    public Variable BinOp.variable(Runtime rt)		{ return null; }
+    public Variable Number.variable(Runtime rt)		{ return null; }
+    public Variable Call.variable(Runtime rt)		{ return null; }
+    public Variable ID.variable(Runtime rt) {
+	return rt.getDeclaration(this).variable(rt);
+    }
+
+    public Variable Subscription.variable(Runtime rt) {
+	throw new RuntimeException("FIXME-10"); // !!!!!!!!!!!!!!!!!!
+    }
+}

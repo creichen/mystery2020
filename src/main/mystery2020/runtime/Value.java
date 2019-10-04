@@ -15,7 +15,21 @@ public class Value {
 			throw new RuntimeException("Must not be null");
 		}
 	}
-	
+
+	public static final Value NOTHING = new Value(MType.ANY, new Object() {
+		@Override
+		public boolean
+		equals(Object other) {
+			return other == this;
+		}
+
+		@Override
+		public String
+		toString() {
+			return "NOTHING";
+		}
+	});
+
 	public MType
 	getType() {
 		return this.type;
