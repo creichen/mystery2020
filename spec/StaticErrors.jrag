@@ -1,12 +1,19 @@
+import mystery2020.MysteryException;
+
 /**
  * Central aspect for triggering (or omitting) static analyses
  */
 aspect StaticErrors {
 
+    coll LinkedList<MysteryException> Program.generalStaticErrors();
+
     public boolean
     Program.staticErrors() {
 	if (!nameErrors().isEmpty()) {
 	    throw nameErrors().get(0);
+	}
+	if (!generalStaticErrors().isEmpty()) {
+	    throw generalStaticErrors().get(0);
 	}
 	return false;
     }

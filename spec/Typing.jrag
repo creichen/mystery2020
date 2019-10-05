@@ -1,5 +1,6 @@
 import mystery2020.MType;
 import mystery2020.MinMax;
+import mystery2020.InvalidSubrangeException;
 
 /**
  * General type assignment (independent of specific typing schemes)
@@ -11,6 +12,10 @@ aspect Typing {
 			  MType.parseInt(line(), column(), this.getLower()),
 			  MType.parseInt(line(), column(), this.getUpper()));
     }
+
+    Subrange contributes (new InvalidSubrangeException(line(), "Invalid subrange"))
+	when getMinMax().getMin() > getMinMax().getMax()
+	to Program.generalStaticErrors();
 
     syn MType Type.getMType();
 

@@ -13,6 +13,7 @@ aspect Variable {
     Expr implements VariableInterface;
     Decl implements VariableInterface;
 
+
     public boolean TypeDecl.isVariable()	{ return false; }
     public boolean ProcDecl.isVariable()	{ return false; }
     public boolean VarDecl.isVariable()		{ return true; }

@@ -21,6 +21,10 @@ aspect Run {
 	this.getBody().run(rt);
     }
 
+    Assignment contributes (new InvalidVariableKindException(line(), "Trying to assign to non-variable"))
+	when !getLHS().isVariable()
+	to Program.generalStaticErrors();
+
     public Value
     Assignment.run(Runtime rt) {
 	rt.runStep();
