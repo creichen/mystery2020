@@ -3,7 +3,8 @@
  */
 aspect StaticErrors {
 
-    boolean Program.staticErrors() {
+    public boolean
+    Program.staticErrors() {
 	if (!nameErrors().isEmpty()) {
 	    throw nameErrors().get(0);
 	}

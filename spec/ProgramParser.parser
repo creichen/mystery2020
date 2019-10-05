@@ -100,17 +100,17 @@ VarDecl formal =
     ;
 
 Type type =
-    INTEGER						{: return new IntType(); :}
-    | UNIT						{: return new UnitType(); :}
-    | subrange						{: return new SubrangeType(subrange); :}
-    | ARRAY subrange OF opt_type			{: return new ArrayType(subrange, opt_type); :}
-    | IDENTIFIER					{: return new NamedType(IDENTIFIER); :}
-    | PROCEDURE OPAREN formals CPAREN OF opt_type	{: return new ProcType(formals, opt_type); :}
+    INTEGER					{: return new IntType(); :}
+    | UNIT					{: return new UnitType(); :}
+    | subrange					{: return new SubrangeType(subrange); :}
+    | ARRAY subrange OF type			{: return new ArrayType(subrange, type); :}
+    | IDENTIFIER				{: return new NamedType(IDENTIFIER); :}
+    | PROCEDURE OPAREN formals CPAREN opt_type	{: return new ProcType(formals, opt_type); :}
     ;
 
 Subrange subrange =
-      OBRACKET INT_LITERAL.LOW TO INT_LITEARAL.HIGH CBRACKET
-			{: return new Subrange(LOW, HIGH); :}
+      OBRACKET INT_LITERAL.low TO INT_LITERAL.high CBRACKET
+			{: return new Subrange(low, high); :}
     ;
 
 Block block =

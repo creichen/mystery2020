@@ -1,4 +1,6 @@
 package mystery2020;
+
+import mystery2020.runtime.Runtime;
 import AST.*;
 
 import java.io.*;
@@ -12,7 +14,11 @@ public class Interpreter {
         // Construct the AST
         Program m = parseFile(filename);
         m.setConfiguration(new Configuration());
-        System.out.println(m.toString());
+        Runtime rt = new Runtime();
+        m.run(rt);
+        for (String s : rt.getOutput()) {
+        	System.out.println(s);
+        }
     }
 
     public static String
@@ -48,6 +54,7 @@ public class Interpreter {
     public static Program
     parse(Reader reader) {
     	ProgramScanner scanner = new ProgramScanner(reader);
+    	
     	ProgramParser parser = new ProgramParser();
     	try {
     		Program result = (Program)parser.parse(scanner);

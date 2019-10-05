@@ -13,6 +13,16 @@ public abstract class MysteryException extends RuntimeException {
 		this.message = message;
 	}
 	
+	public int
+	getLineNr() {
+		return this.line_nr;
+	}
+
+	public String
+	getKey() {
+		return this.key;
+	}
+
 	public String toString() {
 		return this.key + " " + this.line_nr + (this.message.length() == 0 ? "" : (" " + this.message));
 	}

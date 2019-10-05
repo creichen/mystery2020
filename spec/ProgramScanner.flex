@@ -45,10 +45,10 @@ DecimalNumeral = 0 | {NonZeroDigit} {Digits}?
 ":"			{ return sym(Terminals.COLON); }
 ","			{ return sym(Terminals.COMMA); }
 "="			{ return sym(Terminals.EQ); }
-"("			{ return sym(Terminals.OPAREN); }
-")"			{ return sym(Terminals.CPAREN); }
-"["			{ return sym(Terminals.OBRACKET); }
-"]"			{ return sym(Terminals.CBRACKET); }
+"\("			{ return sym(Terminals.OPAREN); }
+"\)"			{ return sym(Terminals.CPAREN); }
+"\["			{ return sym(Terminals.OBRACKET); }
+"\]"			{ return sym(Terminals.CBRACKET); }
 ">"			{ return sym(Terminals.GT); }
 "+"			{ return sym(Terminals.PLUS); }
 ":="			{ return sym(Terminals.COLONEQ); }
@@ -63,6 +63,7 @@ DecimalNumeral = 0 | {NonZeroDigit} {Digits}?
 "UNIT"			{ return sym(Terminals.UNIT); }
 "TO"			{ return sym(Terminals.TO); }
 "ARRAY"			{ return sym(Terminals.ARRAY); }
+"OF"			{ return sym(Terminals.OF); }
 "RETURN"		{ return sym(Terminals.RETURN); }
 "IF"			{ return sym(Terminals.IF); }
 "THEN"			{ return sym(Terminals.THEN); }
