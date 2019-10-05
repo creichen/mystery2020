@@ -4,6 +4,7 @@
 /.classpath
 /.project
 /.settings
+src/test/**
 **/*~
 **/*#
 mystery2020-all.jar
