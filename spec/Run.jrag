@@ -76,8 +76,16 @@ aspect Run {
 
     public Value
     While.run(Runtime rt) {
-	rt.runStep();
-	throw new RuntimeException("FIXME-3"); // !!!!!!!!!!!!!!!
+	while (!this.getCond().eval(rt).getValue().equals(0)) {
+	    rt.runStep();
+	    for (Stmt s : this.getStmts()) {
+		Value retval = s.run(rt);
+		if (retval != null) {
+		    return retval;
+		}
+	    }
+	}
+	return null;
     }
 
     public Value
