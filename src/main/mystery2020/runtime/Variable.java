@@ -53,10 +53,14 @@ public class Variable {
 	getValue() {
 		return this.value;
 	}
-	
+
+	/**
+	 * No type checking here, type checking happens at assignments and calls
+	 * 
+	 * @param v
+	 */
 	public void
 	setValue(Value v) {
-		// typecheck here?
 		this.value = v;
 	}
 	
@@ -64,5 +68,10 @@ public class Variable {
 	public String
 	toString() {
 		return this.name + ":" + this.type + "=" + this.value; 
+	}
+
+	public void
+	setName(String new_name) {
+		this.name = new_name;
 	}
 }

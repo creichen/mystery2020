@@ -24,9 +24,26 @@ aspect Typing {
     eq SubrangeType.getMType() = MType.SUBRANGE(getSubrange().getMinMax());
     eq ArrayType.getMType() { throw new RuntimeException("Unsupported"); }
     eq NamedType.getMType() { throw new RuntimeException("Unsupported"); }
-    eq ProcType.getMType() { throw new RuntimeException("Unsupported"); }
-    eq UnitType.getMType() { throw new RuntimeException("Unsupported"); }
+    eq UnitType.getMType() = MType.UNIT;
+    eq ProcType.getMType() {
+	MType[] args = new MType[this.getNumFormal()];
+	MType ret = this.getType().getMType();
+	for (int i = 0; i < this.getNumFormal(); ++i) {
+	    args[i] = this.getFormal(i).getMType();
+	}
+	return MType.PROCEDURE(args, ret);
+    }
 
     syn MType VarDecl.getMType();
     eq VarDecl.getMType() = getType().getMType();
+
+    syn MType ProcDecl.getMType();
+    eq ProcDecl.getMType() {
+	MType[] args = new MType[this.getNumDecl()];
+	MType ret = this.getType().getMType();
+	for (int i = 0; i < this.getNumDecl(); ++i) {
+	    args[i] = this.getDecl(i).getMType();
+	}
+	return MType.PROCEDURE(args, ret);
+    }
 }

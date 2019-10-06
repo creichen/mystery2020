@@ -45,8 +45,39 @@ public class VariableStack {
 	toString() {
 		StringBuffer sb = new StringBuffer("VariableStack:\n");
 		for (int i = 0; i < this.stack.size(); i++) {
-			sb.append(i + ": " + this.stack.get(i).toString());
+			sb.append(i + ": " + this.stack.get(i).toString() + "\n");
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Creates a shallow copy of this variable stack
+	 *
+	 * @return
+	 */
+	public VariableStack
+	copyTruncated(int depth) {
+		int size = this.stack.size();
+		if (depth > size) {
+			throw new RuntimeException("Can't truncate stack of size " + size + " to " + depth);
+		}
+		Stack<VariableVector> va = new Stack<>();
+		for (int i = 0; i < depth; i++) {
+			va.push(this.stack.get(i));
+		}
+		VariableStack result = new VariableStack(va);
+		return result;
+	}
+	
+	/**
+	 * Creates a shallow copy of this variable stack
+	 *
+	 * @return
+	 */
+	public VariableStack
+	copy() {
+		Stack<VariableVector> va = new Stack<>();
+		va.addAll(this.stack);
+		return new VariableStack(va);
 	}
 }

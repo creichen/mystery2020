@@ -37,4 +37,9 @@ public class VariableVector {
 		}
 		return sb.toString();
 	}
+
+	public int
+	size() {
+		return this.vector.length;
+	}
 }

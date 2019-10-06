@@ -2,6 +2,7 @@ package mystery2020.runtime;
 
 import mystery2020.Configuration;
 import mystery2020.MType;
+import mystery2020.NotAClosureException;
 import mystery2020.TypeException;
 
 public class Value {
@@ -38,6 +39,14 @@ public class Value {
 	public Object
 	getValue() {
 		return this.value;
+	}
+	
+	public Value
+	call(Runtime rt, int line, VariableVector args) {
+		if (this.value instanceof Closure) {
+			return ((Closure)this.value).call(rt, line, args);
+		}
+		throw new NotAClosureException(line, "Cannot be called: " + this);
 	}
 
 	/**

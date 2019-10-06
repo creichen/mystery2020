@@ -18,6 +18,8 @@ aspect Run {
 	if (this.staticErrors()) { // will throw exception
 	    return;
 	}
+	// System.err.println("================================================================================");
+	// System.err.println(this);
 	this.getBody().run(rt);
     }
 
@@ -32,6 +34,8 @@ aspect Run {
 	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
 	}
 	this.getLHS().variable(rt).setValue(this.getRHS().eval(rt));
+	// System.err.println("# after assignment " + this + ":");
+	// System.err.println(rt);
 	return null;
     }
 
@@ -45,6 +49,19 @@ aspect Run {
     Block.run(Runtime rt) {
 	rt.runStep();
 	rt.getStack().push(this.variableVector().instantiate());
+
+	/*
+	System.err.println("ENTERING BLOCK with vars:");
+	for (Decl decl : this.getDecls()) {
+	    if (decl instanceof VarDecl) {
+		VarDecl vd = (VarDecl) decl;
+		System.err.println("  " + vd + " <" + vd.accessDepth() + ":" + vd.accessIndex() + ">");
+	    }
+	}
+	System.err.println(":VV = " + this.variableVector());
+	System.err.println("==>\n" + rt.getStack());
+	*/
+
 	for (Stmt stmt : this.getStmts()) {
 	    Value retval = stmt.run(rt);
 	    if (retval != null) {

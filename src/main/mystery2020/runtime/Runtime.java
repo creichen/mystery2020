@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import AST.Decl;
+import AST.Expr;
 import AST.ID;
 import AST.VarDecl;
 
@@ -23,6 +24,11 @@ public class Runtime {
 	public VariableStack
 	getStack() {
 		return this.stack;
+	}
+	
+	public void
+	setStack(VariableStack new_stack) {
+		this.stack = new_stack;
 	}
 	
 	/**
@@ -64,5 +70,35 @@ public class Runtime {
 		// FIXME: static scoping only for now
 		return this.getStack().getVariable(var.accessDepth(), var.accessIndex());
 	}
+
+	private Variable
+	prepareCallArgument(Expr expr) {
+		// FIXME: pass-by-value only for now
+		Value v = expr.eval(this);
+		Variable var = new Variable(v.getType(), null);
+		var.setValue(v);
+		return var; 
+	}
 	
+	/**
+	 * Computes a variable vector that represents the call arguments irrespective of parameter passing mode. 
+	 *
+	 * @param args
+	 * @return
+	 */
+	public VariableVector
+	prepareCallArguments(AST.List<Expr> args) {
+		Variable[] vars = new Variable[args.getNumChild()];
+		// FIXME: only left-to-right eval order for now
+		for (int i = 0; i < args.getNumChild(); i++) {
+			vars[i] = this.prepareCallArgument(args.getChild(i));
+		}
+		return new VariableVector(vars);
+	}
+	
+	@Override
+	public String
+	toString() {
+		return "RT output=" + this.output + "\n" + this.stack;
+	}
 }

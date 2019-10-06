@@ -21,6 +21,8 @@ aspect Variable {
     public Variable TypeDecl.variable(Runtime rt)	{ return null; }
     public Variable ProcDecl.variable(Runtime rt)	{ return null; }
     public Variable VarDecl.variable(Runtime rt) {
+	// System.err.println("Grabbing variable " + this + "<"+this.accessDepth()+":"+accessIndex()+">");
+	// System.err.println(rt);
 	return rt.getVariable(this);
     }
 
@@ -29,6 +31,7 @@ aspect Variable {
     public boolean BinOp.isVariable()		{ return false; }
     public boolean Number.isVariable()		{ return false; }
     public boolean Call.isVariable()		{ return false; }
+    public boolean UnitValue.isVariable()	{ return false; }
     public boolean ID.isVariable()		{ return true; }
     public boolean Subscription.isVariable()	{ return true; }
 
@@ -36,6 +39,7 @@ aspect Variable {
     public Variable BinOp.variable(Runtime rt)		{ return null; }
     public Variable Number.variable(Runtime rt)		{ return null; }
     public Variable Call.variable(Runtime rt)		{ return null; }
+    public Variable UnitValue.variable(Runtime rt)	{ return null; }
     public Variable ID.variable(Runtime rt) {
 	return rt.getDeclaration(this).variable(rt);
     }

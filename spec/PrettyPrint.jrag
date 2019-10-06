@@ -1,0 +1,317 @@
+aspect PrettyPrint {
+    class Stringifier {
+	StringBuffer sb = new StringBuffer();
+	private int indentation = 0;
+	private boolean newline = true;
+
+	public void
+	indent() {
+	    this.indentation += 1;
+	}
+
+	public void
+	unindent() {
+	    this.indentation -= 1;
+	}
+
+	public void
+	newline() {
+	    sb.append("\n");
+	    newline = true;
+	}
+
+	public void
+	newlineIfNeeded() {
+	    if (newline) {
+		return;
+	    }
+	    sb.append("\n");
+	    newline = true;
+	}
+
+	public void
+	add(String s) {
+	    if (newline) {
+		for (int i = 0; i < this.indentation; i++) {
+		    sb.append("  ");
+		}
+		newline = false;
+	    }
+	    this.sb.append(s);
+	}
+
+	public void
+	addln(String s) {
+	    this.add(s);
+	    this.newline();
+	}
+
+	public String
+	toString() {
+	    return this.sb.toString();
+	}
+    }
+
+    interface Stringifiable {
+	public void stringify(Stringifier s);
+    }
+
+    ASTNode implements Stringifiable;
+
+    public String ASTNode.toString() {
+	Stringifier s = new Stringifier();
+	this.stringify(s);
+	return s.toString();
+    }
+
+    public void ASTNode.stringify(Stringifier s) {
+	throw new RuntimeException(this.getClass() + " does not implement stringify");
+    }
+
+    public void Program.stringify(Stringifier s) {
+	this.getBody().stringify(s);
+    }
+
+    public void VarDecl.stringify(Stringifier s) {
+	s.add("VAR ");
+	s.add(this.getName());
+	s.add(" : ");
+	this.getType().stringify(s);
+    }
+
+    public void TypeDecl.stringify(Stringifier s) {
+	s.add("TYPE ");
+	s.add(this.getName());
+	s.add(" = ");
+	this.getType().stringify(s);
+    }
+
+    public void ProcDecl.stringify(Stringifier s) {
+	s.add("PROCEDURE");
+	//s.add("{" + this.staticNestingDepth() + "}");
+	s.add(" ");
+	s.add(this.getName());
+	s.add("(");
+	boolean first = true;
+	for (VarDecl formal : this.getDecls()) {
+	    if (first) {
+		first = false;
+	    } else {
+		s.add(", ");
+	    }
+	    formal.stringify(s);
+	}
+	s.add(") : ");
+	this.getType().stringify(s);
+	s.add(" = ");
+	s.newline();
+	s.indent();
+	this.getBody().stringify(s);
+	s.unindent();
+    }
+
+    public void Subrange.stringify(Stringifier s) {
+	s.add("[" + this.getLower() + " TO " + this.getUpper() + "]");
+    }
+
+    public void UnknownType.stringify(Stringifier s) {
+	s.add("?");
+    }
+
+    public void IntType.stringify(Stringifier s) {
+	s.add("INTEGER");
+    }
+
+    public void UnitType.stringify(Stringifier s) {
+	s.add("UNIT");
+    }
+
+    public void SubrangeType.stringify(Stringifier s) {
+	this.getSubrange().stringify(s);
+    }
+
+    public void ArrayType.stringify(Stringifier s) {
+	s.add("ARRAY ");
+	this.getSubrange().stringify(s);
+	s.add(" OF ");
+	this.getElementType().stringify(s);
+    }
+
+    public void NamedType.stringify(Stringifier s) {
+	s.add(this.getName());
+    }
+
+    public void ProcType.stringify(Stringifier s) {
+	s.add("PROCEDURE (");
+	boolean first = true;
+	for (VarDecl vardecl : this.getFormals()) {
+	    if (first) {
+		first = false;
+	    } else {
+		s.add(", ");
+	    }
+	    vardecl.stringify(s);
+	}
+	s.add(") : ");
+	this.getType().stringify(s);
+    }
+
+    public void Assignment.stringify(Stringifier s) {
+	this.getLHS().stringify(s);
+	s.add(" := ");
+	this.getRHS().stringify(s);
+    }
+
+    public void Return.stringify(Stringifier s) {
+	s.add("PRINT ");
+	this.getExpr().stringify(s);
+    }
+
+    public void Block.stringify(Stringifier s) {
+	boolean first = true;
+	for (Decl decl : this.getDecls()) {
+	    if (first) {
+		first = false;
+	    } else {
+		s.add(";");
+		s.newlineIfNeeded();
+	    }
+	    decl.stringify(s);
+	}
+	s.newlineIfNeeded();
+	s.add("BEGIN");
+	//s.add("{" + this.staticNestingDepth() + "}");
+	s.newline();
+	s.indent();
+	first = true;
+	for (Stmt stmt : this.getStmts()) {
+	    if (first) {
+		first = false;
+	    } else {
+		s.add(";");
+		s.newlineIfNeeded();
+	    }
+	    stmt.stringify(s);
+	}
+	s.unindent();
+	s.newlineIfNeeded();
+	s.add("END");
+    }
+
+    public void Conditional.stringify(Stringifier s) {
+	s.add("IF ");
+	this.getCond().stringify(s);
+	s.addln(" THEN");
+	s.indent();
+	for (Stmt stmt : this.getTrueBranchStmts()) {
+	    stmt.stringify(s);
+	    s.newlineIfNeeded();
+	}
+	s.unindent();
+	s.addln("ELSE");
+	s.indent();
+	for (Stmt stmt : this.getFalseBranchStmts()) {
+	    stmt.stringify(s);
+	    s.newlineIfNeeded();
+	}
+	s.unindent();
+	s.addln("END");
+    }
+
+    public void While.stringify(Stringifier s) {
+	s.add("WHILE ");
+	this.getCond().stringify(s);
+	s.addln(" DO");
+	s.indent();
+	for (Stmt stmt : this.getStmts()) {
+	    stmt.stringify(s);
+	    s.newlineIfNeeded();
+	}
+	s.unindent();
+	s.addln("END");
+    }
+
+    public void Output.stringify(Stringifier s) {
+	s.add("PRINT ");
+	this.getExpr().stringify(s);
+    }
+
+    public void ExprStmt.stringify(Stringifier s) {
+	this.getExpr().stringify(s);
+    }
+
+    public void BinOpSequence.stringify(Stringifier s) {
+	s.add("[<");
+	this.getLHS().stringify(s);
+	this.getOperator().stringify(s);
+	this.getRHS().stringify(s);
+	s.add(">]");
+    }
+
+    public void BinOp.stringify(Stringifier s) {
+	s.add("(");
+	this.getLHS().stringify(s);
+	this.getOperator().stringify(s);
+	this.getRHS().stringify(s);
+	s.add(")");
+    }
+
+    public void Number.stringify(Stringifier s) {
+	s.add(this.getNumber());
+    }
+
+    public void Call.stringify(Stringifier s) {
+	this.getCallee().stringify(s);
+	boolean first = true;
+	s.add("(");
+	for (Expr actual : this.getActuals()) {
+	    if (first) {
+		first = false;
+	    } else {
+		s.add(", ");
+	    }
+	    actual.stringify(s);
+	}
+	s.add(")");
+    }
+
+    public void ID.stringify(Stringifier s) {
+	s.add(this.getName());
+	// if static scoping and debugging
+	/*
+	Decl d = this.staticDeclaration();
+	if (d instanceof VarDecl) {
+	    VarDecl vd = (VarDecl) d;
+	    s.add("{");
+	    s.add(vd.accessDepth() + ":" + vd.accessIndex());
+	    s.add("}");
+	}
+	*/
+    }
+
+    public void Subscription.stringify(Stringifier s) {
+	this.getTarget().stringify(s);
+	s.add("[");
+	this.getIndex().stringify(s);
+	s.add("]");
+    }
+
+    public void UnitValue.stringify(Stringifier s) {
+    }
+
+    public void AddOp.stringify(Stringifier s) {
+	s.add(" + ");
+    }
+
+    public void GTOp.stringify(Stringifier s) {
+	s.add(" > ");
+    }
+
+    public void EqOp.stringify(Stringifier s) {
+	s.add(" == ");
+    }
+
+    public void AndOp.stringify(Stringifier s) {
+	s.add(" AND ");
+    }
+}

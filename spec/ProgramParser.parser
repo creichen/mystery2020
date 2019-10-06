@@ -130,10 +130,12 @@ List stmt_list =
 Stmt stmt =
       expr.lhs COLONEQ expr.rhs			{: return new Assignment(lhs, rhs); :}
     | RETURN expr				{: return new Return(expr); :}
+    | RETURN					{: return new Return(new UnitValue()); :}
     | block					{: return block; :}
     | IF expr THEN stmts.tb ELSE stmts.fb END	{: return new Conditional(expr, tb, fb); :}
     | WHILE expr DO stmts END			{: return new While(expr, stmts); :}
     | PRINT expr				{: return new Output(expr); :}
+    | expr					{: return new ExprStmt(expr); :}
     ;
 
 Expr expr =

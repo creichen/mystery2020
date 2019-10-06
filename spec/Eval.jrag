@@ -1,7 +1,8 @@
-import mystery2020.runtime.Runtime;
 import beaver.Symbol;
 import mystery2020.IntLiteralException;
 import mystery2020.MType;
+import mystery2020.runtime.Runtime;
+import mystery2020.runtime.VariableVector;
 
 /**
  * Expression evaluation
@@ -28,7 +29,8 @@ aspect Eval {
 
     public Value
     ProcDecl.eval(Runtime rt) {
-	throw new RuntimeException("FIXME-11"); // !!!!!!!!!!!!!!!
+	return new Value(getMType(),
+			 new Closure(this, rt.getStack().copyTruncated(this.staticNestingDepth())));
     }
 
     // ========================================
@@ -65,7 +67,15 @@ aspect Eval {
     public Value
     Call.eval(Runtime rt) {
 	rt.runCall();
-	throw new RuntimeException("FIXME-8"); // !!!!!!!!!!!!!!!
+	Value v = this.getCallee().eval(rt);
+	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
+	return v.call(rt, line(), actuals);
+    }
+
+    public Value
+    UnitValue.eval(Runtime rt) {
+	// No idea why anyone has a reason to call this
+	return Value.NOTHING;
     }
 
     // ========================================

@@ -104,10 +104,14 @@ aspect StaticScoping {
     eq Block.getDecl(int index).index() = index;
     eq Call.getActual(int index).index() = index;
 
-    inh int AbstractBlock.staticNestingDepth();
-    eq Program.getBody().staticNestingDepth() = 0;
-    eq ProcDecl.getBody().staticNestingDepth() = staticNestingDepth() + 1;
-    eq Block.getStmt(int index).staticNestingDepth() = staticNestingDepth() + 1;
+    inh int AbstractBlock.staticNestingDepthCounter();
+    eq Program.getBody().staticNestingDepthCounter() = 0;
+    eq ProcDecl.getBody().staticNestingDepthCounter() = staticNestingDepthCounter() + 2;
+    eq Block.getStmt(int index).staticNestingDepthCounter() = staticNestingDepthCounter() + 1;
+
+    syn int AbstractBlock.staticNestingDepth();
+    eq Block.staticNestingDepth() = staticNestingDepthCounter();
+    eq ProcDecl.staticNestingDepth() = staticNestingDepthCounter() + 1;
 
     inh int VarDecl.accessDepth();
     eq ProcDecl.getDecl().accessDepth() = staticNestingDepth();
@@ -165,11 +169,10 @@ aspect StaticScoping {
 		return decl;
 	    }
     	}
-	System.err.println(parent.getClass());
     	return lookupStatic(name);
     }
 
-    eq Block.getStmt().lookupStatic(String name) {
+    Decl Block.localLookupStatic(String name) {
     	for (Decl decl : this.getDecls()) {
 	    // FIXME: once we support multiple scopes, separate by type
     	    if (decl.name().equals(name)) {
@@ -178,4 +181,7 @@ aspect StaticScoping {
     	}
     	return lookupStatic(name);
     }
+
+    eq Block.getStmt().lookupStatic(String name) { return localLookupStatic(name); }
+    eq Block.getDecl().lookupStatic(String name) { return localLookupStatic(name); }
 }
