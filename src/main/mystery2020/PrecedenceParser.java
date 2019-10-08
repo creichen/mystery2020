@@ -22,6 +22,12 @@ public class PrecedenceParser {
 	List<Stratum> strata = new ArrayList<>();
 	
 	public PrecedenceParser(Map<Op, OpConfig> config) {
+		System.err.println("Making precedence parser:" + config);
+		try {
+			throw new RuntimeException();
+		} catch (RuntimeException exn) {
+			exn.printStackTrace();
+		}
 		this.config = config;
 		List<Integer> stratum_precedences = new ArrayList<>();
 		

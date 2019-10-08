@@ -89,10 +89,7 @@ public class Runtime {
 	public VariableVector
 	prepareCallArguments(AST.List<Expr> args) {
 		Variable[] vars = new Variable[args.getNumChild()];
-		// FIXME: only left-to-right eval order for now
-		for (int i = 0; i < args.getNumChild(); i++) {
-			vars[i] = this.prepareCallArgument(args.getChild(i));
-		}
+		args.config().parameter_evaluation_order.get().prepareCallArguments(vars, args, e -> this.prepareCallArgument(e));
 		return new VariableVector(vars);
 	}
 	

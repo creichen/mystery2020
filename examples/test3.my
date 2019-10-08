@@ -1,5 +1,14 @@
-VAR x : [1 TO 2]
+VAR x : [1 TO 2];
+PROCEDURE P(x : INTEGER) =
+  BEGIN
+    PRINT x
+  END;
+PROCEDURE Q(x : INTEGER, y : INTEGER) =
+  BEGIN
+  END
 BEGIN
   x := 2;
-  PRINT x
+  PRINT x;
+  PRINT Q(P(10), P(11));
+  PRINT 1 == 1 + 1 == 0
 END
