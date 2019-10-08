@@ -18,6 +18,8 @@ public class Interpreter {
 	private CommandLineOption[] command_line_options = new CommandLineOption[] {
 			new CommandLineOption('v', "Print version number", false, s -> { Interpreter.action = Interpreter::print_version; }), 
 			new CommandLineOption('P', "Print input program after parsing, rather than running it", false, s -> { Interpreter.action = Interpreter::print_after_parse; }), 
+			new CommandLineOption('l', "List configuration options (human-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options; }), 
+			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }), 
 			new CommandLineOption('h', "Print this help", false,      s -> { Interpreter.action = Interpreter::print_help; }),
 			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s)) 
 	};
@@ -101,7 +103,48 @@ public class Interpreter {
         	throw new RuntimeException(exn);
         }
 	}
+
+	private static String
+	pad(String s, int len) {
+		while (s.length() < len) {
+			s += " ";
+		}
+		return s;
+	}
+
+	private static void
+	print_config_options(String[] args) {
+		System.out.println("Configuration options are written\n  SUBSYS0:OPT0,SUBSYS1:OPT1,...,SUBSYSn:OPTn");
+		System.out.println("\nEach SUBSYSi is a subsystem.  There are multiple subsystems that can be configured (listed below).\n");
+		System.out.println("Subsystem " + Configuration.OP_SUBSYSTEM_CODE + ":");
+		System.out.println("  This subsystem uses a string of " + (Configuration.Op.values().length) + " pairs of the form");
+		System.out.println("     pa        where p = precedence ('0'...'9'), and a = associativity('l', 'r', or '-' for non-associative.");
+		System.out.println("  For example:\n");
+		System.out.println("     2r        selects precedence 2 (lower than 3, higher than 1), right-associativity.");
+		System.out.println("  The order in which these pairs are specified for the different operators is:");
+		for (Configuration.Op op : Configuration.Op.values()) {
+			System.out.println("    " + op);
+		}
+		for (ConfigSubsystem<?> subsys : Configuration.getSubsystems()) {
+			System.out.println("\nSubsystem " + subsys.getCode() + " :");
+			for (int i = 0; i < subsys.size(); i++) {
+				ConfigOption<?> opt = subsys.getAt(i);
+				System.out.println("    " + pad(opt.getCode(), 10) + opt.getName());
+			}
+		}
+	}
 	
+	private static void
+	print_config_options_machine(String[] args) {
+		for (ConfigSubsystem<?> subsys : Configuration.getSubsystems()) {
+			System.out.println(subsys.getCode());
+			for (int i = 0; i < subsys.size(); i++) {
+				ConfigOption<?> opt = subsys.getAt(i);
+				System.out.println(":" + opt.getCode() + " " + opt.getName());
+			}
+		}
+	}
+
 	private static void
 	print_version(String[] args) {
 		System.out.println("Mystery2020, version " + VERSION);

@@ -14,10 +14,19 @@ public class Configuration {
 	// operators
 	
 	public enum Op {
-		ADD,
-		EQ,
-		GT,
-		AND
+		ADD("+"),
+		EQ("=="),
+		GT(">"),
+		AND("AND");
+		
+		private String sourcename;
+		private Op(String sourcename) {
+			this.sourcename = sourcename;
+		}
+		public String
+		getSourcename() {
+			return this.sourcename;
+		}
 	}
 	
 	private Map<Op, OpConfig> op_config = new HashMap<>();
@@ -151,5 +160,10 @@ public class Configuration {
 		}
 		
 		return output.toString();
+	}
+
+	public static  List<? extends ConfigSubsystem<?>>
+	getSubsystems() {
+		return Configuration.subsystems_ordered;
 	}
 }

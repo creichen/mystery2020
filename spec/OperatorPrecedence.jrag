@@ -33,7 +33,6 @@ aspect OperatorPrecedence {
     rewrite BinOpSequence {
 	when (!PrecedenceParser.testMode && !(parent instanceof BinOpSequence))
 	to Expr {
-	    System.err.println("rewrite at " + this.getOperator());
 	    return precedenceParser().parse(this);
 	}
     }
