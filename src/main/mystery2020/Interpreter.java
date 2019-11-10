@@ -9,21 +9,23 @@ import java.util.function.Consumer;
 
 public class Interpreter {
 	private static final Interpreter interpreter = new Interpreter(); // this only exists so we can use :: notation conveniently
-	private static final String VERSION = "0.1.0";
-	
+	private static final String VERSION = "0.1.1";
+
+	public static final String READ_FROM_STDIN = "-";
+
 	static Configuration configuration = new Configuration();
-	
-	private static Consumer<String[]> action = Interpreter::run;  
+
+	private static Consumer<String[]> action = Interpreter::run;
 
 	private CommandLineOption[] command_line_options = new CommandLineOption[] {
-			new CommandLineOption('v', "Print version number", false, s -> { Interpreter.action = Interpreter::print_version; }), 
-			new CommandLineOption('P', "Print input program after parsing, rather than running it", false, s -> { Interpreter.action = Interpreter::print_after_parse; }), 
-			new CommandLineOption('l', "List configuration options (human-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options; }), 
-			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }), 
+			new CommandLineOption('v', "Print version number", false, s -> { Interpreter.action = Interpreter::print_version; }),
+			new CommandLineOption('P', "Print input program after parsing, rather than running it", false, s -> { Interpreter.action = Interpreter::print_after_parse; }),
+			new CommandLineOption('l', "List configuration options (human-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options; }),
+			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }),
 			new CommandLineOption('h', "Print this help", false,      s -> { Interpreter.action = Interpreter::print_help; }),
-			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s)) 
+			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s))
 	};
-	
+
     public static void
     main(String[] args) throws FileNotFoundException {
 		ArrayList<String> leftover_args = new ArrayList<>();
@@ -37,14 +39,14 @@ public class Interpreter {
 			}
 
 			if (active_option == null) {
-				if (arg.startsWith("-")) {
+				if (arg.length() > 1 && arg.startsWith("-")) {
 					if (arg.equals("--")) {
 						// append all remaining arguments
 						quick_append_mode = true;
 						continue;
 					}
 					boolean found = false;
-					
+
 					for (CommandLineOption option: Interpreter.interpreter.command_line_options) {
 						if (option.accepts(arg)) {
 							found = true;
@@ -71,14 +73,19 @@ public class Interpreter {
 
 		Interpreter.action.accept(leftover_args.toArray(new String[leftover_args.size()]));
     }
-	
+
 	private static void
 	run(String[] args) {
         String filename = getFilename(args);
 
         try {
         	// Construct the AST
-        	Program m = parseFile(filename);
+        	Program m;
+		if (filename.equals(READ_FROM_STDIN)) {
+			m = parse(new InputStreamReader(System.in));
+		} else {
+			m = parseFile(filename);
+		}
         	m.setConfiguration(Interpreter.configuration);
         	Runtime rt = new Runtime();
         	m.run(rt);
@@ -87,9 +94,11 @@ public class Interpreter {
         	}
         } catch (IOException exn) {
         	throw new RuntimeException(exn);
-        }
+        } catch (MysteryException exn) {
+		System.err.println(exn);
 	}
-	
+	}
+
 	private static void
 	print_after_parse(String[] args) {
         String filename = getFilename(args);
@@ -133,11 +142,11 @@ public class Interpreter {
 			}
 		}
 	}
-	
+
 	private static void
 	print_config_options_machine(String[] args) {
 		for (ConfigSubsystem<?> subsys : Configuration.getSubsystems()) {
-			System.out.println(subsys.getCode());
+			System.out.println(subsys.getCode() + " " + subsys.getName());
 			for (int i = 0; i < subsys.size(); i++) {
 				ConfigOption<?> opt = subsys.getAt(i);
 				System.out.println(":" + opt.getCode() + " " + opt.getName());
@@ -193,7 +202,7 @@ public class Interpreter {
     public static Program
     parse(Reader reader) {
     	ProgramScanner scanner = new ProgramScanner(reader);
-    	
+
     	ProgramParser parser = new ProgramParser();
     	try {
     		Program result = (Program)parser.parse(scanner);
@@ -204,7 +213,7 @@ public class Interpreter {
     		throw new Error(e);
     	}
     }
-    
+
     private class CommandLineOption {
     	private boolean takes_arg;
     	private char short_option;
@@ -235,7 +244,7 @@ public class Interpreter {
     		sb.append(this.description);
     		return sb.toString();
     	}
-    	
+
     	public boolean
     	takesArgument() {
     		return this.takes_arg;

@@ -46,12 +46,12 @@ public class ConfigSubsystem<T extends ConfigOption<T>> {
 
 	public class Config {
 		T choice = ConfigSubsystem.this.options[0];
-		
+
 		public T
 		get() {
 			return this.choice;
 		}
-		
+
 		public ConfigSubsystem<T>
 		getSubsystem() {
 			return ConfigSubsystem.this;

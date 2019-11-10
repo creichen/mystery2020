@@ -121,6 +121,9 @@ public class Configuration {
 	
 	public void
 	setOptions(String config_string) {
+		if (config_string.length() == 0) {
+			return;
+		}
 		String[] args = config_string.split(",");
 		for (String arg : args) {
 			String[] tuple = arg.split(":");
