@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import mystery2020.runtime.ParameterEvaluationOrder;
+import mystery2020.runtime.ShortCircuitEvaluation;
 
 public class Configuration {
 	// ====================
@@ -91,6 +92,13 @@ public class Configuration {
 			ParameterEvaluationOrder.RightToLeft
 			);
 	public ConfigSubsystem<ParameterEvaluationOrder>.Config parameter_evaluation_order = SUBSYSTEM_parameter_evaluation_order.getConfig(this);
+	private static ConfigSubsystem<ShortCircuitEvaluation> SUBSYSTEM_short_circuit_evaluation = new ConfigSubsystem<>(
+			"Short Circuit Evaluation",
+			"SCE",
+			ShortCircuitEvaluation.ON,
+			ShortCircuitEvaluation.OFF
+			);
+	public ConfigSubsystem<ShortCircuitEvaluation>.Config short_circuit_evaluation = SUBSYSTEM_short_circuit_evaluation.getConfig(this);
 
 	// ==========
 	

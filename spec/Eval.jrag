@@ -9,7 +9,7 @@ import mystery2020.runtime.VariableVector;
  */
 aspect Eval {
 
-    interface EvalInterface {
+    public interface EvalInterface {
 	Value eval(Runtime rt);
     }
 
@@ -126,11 +126,11 @@ aspect Eval {
     }
 
     public Value
-    AndOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
+    AndOp.bin_eval(Value lhs, EvalInterface rhs_closure_in, Runtime rt) {
 	int lhs_v = lhs.getInt(line());
+	EvalInterface rhs_closure = this.config().short_circuit_evaluation.get().processClosure(rhs_closure_in, rt);
 
 	if (0 != lhs_v) {
-	    // fixme: extract this one strictly if appropriate
 	    int rhs_v = rhs_closure.eval(rt).getInt(line());
 
 	    if (0 != rhs_v) {
