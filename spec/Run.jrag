@@ -29,7 +29,7 @@ aspect Run {
 
     public Value
     Assignment.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	if (!this.getLHS().isVariable()) {
 	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
 	}
@@ -41,13 +41,13 @@ aspect Run {
 
     public Value
     Return.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	return this.getExpr().eval(rt);
     }
 
     public Value
     Block.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	rt.getStack().push(this.variableVector().instantiate());
 
 	/*
@@ -74,7 +74,7 @@ aspect Run {
 
     public Value
     Conditional.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	Value cond_val = this.getCond().eval(rt);
 	List<Stmt> statements;
 	if (cond_val.getValue().equals(0)) {
@@ -94,7 +94,7 @@ aspect Run {
     public Value
     While.run(Runtime rt) {
 	while (!this.getCond().eval(rt).getValue().equals(0)) {
-	    rt.runStep();
+	    rt.runStep(this);
 	    for (Stmt s : this.getStmts()) {
 		Value retval = s.run(rt);
 		if (retval != null) {
@@ -107,7 +107,7 @@ aspect Run {
 
     public Value
     Output.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	Value v = this.getExpr().eval(rt);
 	if (v.getType().convertibleTo(MType.INTEGER, config())) {
 	    rt.addOutput(v.getValue().toString());
@@ -119,7 +119,7 @@ aspect Run {
 
     public Value
     ExprStmt.run(Runtime rt) {
-	rt.runStep();
+	rt.runStep(this);
 	this.getExpr().eval(rt);
 	// ignore result
 	return null;

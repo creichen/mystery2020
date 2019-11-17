@@ -66,7 +66,7 @@ aspect Eval {
 
     public Value
     Call.eval(Runtime rt) {
-	rt.runCall();
+	rt.runCall(this);
 	Value v = this.getCallee().eval(rt);
 	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
 	return v.call(rt, line(), actuals);

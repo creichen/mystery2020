@@ -9,6 +9,10 @@ import java.util.Map;
 import mystery2020.runtime.ParameterEvaluationOrder;
 
 public class Configuration {
+	// ====================
+	// limits
+	private int step_limit = 10000;
+	private int call_limit = 1000;
 	
 	// ====================
 	// operators
@@ -168,5 +172,25 @@ public class Configuration {
 	public static  List<? extends ConfigSubsystem<?>>
 	getSubsystems() {
 		return Configuration.subsystems_ordered;
+	}
+
+	public int
+	getCallLimit() {
+		return this.call_limit;
+	}
+	
+	public int
+	getStepLimit() {
+		return this.step_limit;
+	}
+
+	public void
+	setCallLimit(int limit) {
+		this.call_limit = limit;
+	}
+	
+	public void
+	setStepLimit(int limit) {
+		this.step_limit = limit;
 	}
 }

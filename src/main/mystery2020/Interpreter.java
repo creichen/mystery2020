@@ -23,7 +23,9 @@ public class Interpreter {
 			new CommandLineOption('l', "List configuration options (human-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options; }),
 			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }),
 			new CommandLineOption('h', "Print this help", false,      s -> { Interpreter.action = Interpreter::print_help; }),
-			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s))
+			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s)),
+			new CommandLineOption('s', "Set the maximum number of steps to execute", true,  s -> Interpreter.configuration.setStepLimit(Integer.parseInt(s))),
+			new CommandLineOption('u', "Set the maximum number of subprogram calls to execute", true,  s -> Interpreter.configuration.setCallLimit(Integer.parseInt(s)))
 	};
 
     public static void
@@ -87,7 +89,7 @@ public class Interpreter {
 			m = parseFile(filename);
 		}
         	m.setConfiguration(Interpreter.configuration);
-        	Runtime rt = new Runtime();
+        	Runtime rt = new Runtime(Interpreter.configuration);
         	m.run(rt);
         	for (String s : rt.getOutput()) {
         		System.out.println(s);

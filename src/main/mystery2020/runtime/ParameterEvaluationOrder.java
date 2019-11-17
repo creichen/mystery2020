@@ -34,5 +34,4 @@ public abstract class ParameterEvaluationOrder extends AbstractConfigOption<Para
 			}
 		}
 	};
-
 }
