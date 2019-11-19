@@ -63,6 +63,14 @@ public class Value {
 		throw new TypeException(line_nr, "Non-int (" + this.type.toString() + ") to int");
 	}
 	
+	public VariableVector
+	getArray(int line_nr) {
+		if (this.value instanceof VariableVector) {
+			return (VariableVector) this.value;
+		}
+		throw new TypeException(line_nr, "Non-array (" + this.type.toString() + ") to array");
+	}
+	
 	public static Value
 	True(Configuration cfg) {
 		return new Value(MType.INTEGER, 1);

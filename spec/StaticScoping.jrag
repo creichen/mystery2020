@@ -124,7 +124,7 @@ aspect StaticScoping {
     // ========================================
     // Abstract variable vectors (used for stack initialisation)
 
-    syn VariableVector AbstractBlock.variableVector() {
+    syn VariableVector AbstractBlock.variableVector(Runtime rt) {
 	Variable[] vars = new Variable[this.getVariablesNr()];
 
 	int index = 0;
@@ -132,7 +132,7 @@ aspect StaticScoping {
 	for (Decl decl : this.getDecls()) {
 	    if (decl.isVariable()) {
 		VarDecl vdecl = (VarDecl) decl;
-		Variable v = new Variable(vdecl.getMType(), vdecl.getName());
+		Variable v = new Variable(vdecl.getMType(rt), vdecl.getName());
 		vars[index++] = v;
 	    }
 	}
@@ -156,8 +156,13 @@ aspect StaticScoping {
 	return lookupStatic(this.getName());
     }
 
+    syn Decl NamedType.staticDeclaration() {
+    	return lookupStatic(this.getName());
+    }
+
     inh Decl AbstractBlock.lookupStatic(String name);
     inh Decl ID.lookupStatic(String name);
+    inh Decl NamedType.lookupStatic(String name);
 
     eq Program.getBody().lookupStatic(String name) {
 	return null;

@@ -26,8 +26,8 @@ public class Closure {
 	}
 
 	public VariableVector
-	getFormals() {
-		return this.proc.variableVector();
+	getFormals(Runtime rt) {
+		return this.proc.variableVector(rt);
 	}
 
 	/**
@@ -37,8 +37,8 @@ public class Closure {
 	 * @param args
 	 */
 	public void
-	checkAndAdaptActuals(int line_nr, VariableVector actuals) {
-		VariableVector formals = this.getFormals();
+	checkAndAdaptActuals(Runtime rt, int line_nr, VariableVector actuals) {
+		VariableVector formals = this.getFormals(rt);
 		if (formals.size() != actuals.size()) {
 			throw new ParameterCountMismatch(line_nr, "Expected " + formals.size() + ", got " + actuals.size());
 		}
@@ -57,7 +57,7 @@ public class Closure {
 		
 		// prepare env for call
 		VariableStack call_env = this.env.copy();
-		checkAndAdaptActuals(line_nr, args);
+		checkAndAdaptActuals(rt, line_nr, args);
 		call_env.push(args);
 		rt.setStack(call_env);
 		

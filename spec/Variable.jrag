@@ -45,6 +45,7 @@ aspect Variable {
     }
 
     public Variable Subscription.variable(Runtime rt) {
-	throw new RuntimeException("FIXME-10"); // !!!!!!!!!!!!!!!!!!
+	int index = getIndex().eval(rt).getInt(line());
+	return getTarget().eval(rt).getArray(line()).getChecked(line(), index);
     }
 }

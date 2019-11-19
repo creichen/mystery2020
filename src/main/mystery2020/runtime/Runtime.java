@@ -7,6 +7,7 @@ import AST.ASTNode;
 import AST.Decl;
 import AST.Expr;
 import AST.ID;
+import AST.NamedType;
 import AST.VarDecl;
 import mystery2020.Configuration;
 import mystery2020.MysteryLimitException;
@@ -96,6 +97,12 @@ public class Runtime {
 
 	public Decl
 	getDeclaration(ID id) {
+		// FIXME: static scoping only for now
+		return id.staticDeclaration();
+	}
+
+	public Decl
+	getDeclaration(NamedType id) {
 		// FIXME: static scoping only for now
 		return id.staticDeclaration();
 	}

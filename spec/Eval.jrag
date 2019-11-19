@@ -29,7 +29,7 @@ aspect Eval {
 
     public Value
     ProcDecl.eval(Runtime rt) {
-	return new Value(getMType(),
+	return new Value(getMType(rt),
 			 new Closure(this, rt.getStack().copyTruncated(this.staticNestingDepth())));
     }
 
@@ -61,7 +61,7 @@ aspect Eval {
 
     public Value
     Subscription.eval(Runtime rt) {
-	throw new RuntimeException("FIXME-7"); // !!!!!!!!!!!!!!!
+	return this.variable(rt).getValue();
     }
 
     public Value
@@ -80,24 +80,75 @@ aspect Eval {
 
     // ========================================
     // Binary operator evaluation
+    public class BinArguments {
+	private Value lhs_value = null;
+	private Value rhs_value = null;
+	private EvalInterface lhs;
+	private EvalInterface rhs;
+	ASTNode origin;
+
+	public BinArguments(ASTNode origin, EvalInterface lhs_in, EvalInterface rhs_in) {
+	    this.origin = origin;
+	    this.lhs = lhs_in;
+	    this.rhs = rhs_in;
+	}
+
+	/**
+	 * Evaluate arguments in the correct order
+	 */
+	public void
+	prepare(Runtime rt) {
+	    this.origin.config().operand_evaluation_order.get().prepare(this, rt);
+	}
+
+	public void
+	evalLeft(Runtime rt) {
+	    if (this.lhs_value == null) {
+		this.lhs_value = this.lhs.eval(rt);
+		this.lhs = null;
+	    }
+	}
+
+	public void
+	evalRight(Runtime rt) {
+	    if (this.rhs_value == null) {
+		this.rhs_value = this.rhs.eval(rt);
+		this.rhs = null;
+	    }
+	}
+
+	public Value
+	getLHS(Runtime rt) {
+	    this.evalLeft(rt);
+	    return this.lhs_value;
+	}
+
+	public Value
+	getRHS(Runtime rt) {
+	    this.evalRight(rt);
+	    return this.rhs_value;
+	}
+    }
     interface BinEvalInterface {
-	Value bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt);
+	Value bin_eval(BinArguments args, Runtime rt);
     }
     Operator implements BinEvalInterface;
 
 
     public Value
     BinOp.eval(Runtime rt) {
-	Value result = this.getOperator().bin_eval(this.getLHS().eval(rt),
-						   this.getRHS(),
+	Value result = this.getOperator().bin_eval(new BinArguments(this,
+								    this.getLHS(),
+								    this.getRHS()),
 						   rt);
 	return result;
     }
 
     public Value
-    AddOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
-	long lhs_v = lhs.getInt(line());
-	long rhs_v = rhs_closure.eval(rt).getInt(line());
+    AddOp.bin_eval(BinArguments args, Runtime rt) {
+	args.prepare(rt);
+	long lhs_v = args.getLHS(rt).getInt(line());
+	long rhs_v = args.getRHS(rt).getInt(line());
 	long result = lhs_v + rhs_v;
 	int result_int = (int) result;
 	if (result != result_int) {
@@ -107,9 +158,10 @@ aspect Eval {
     }
 
     public Value
-    GTOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
-	int lhs_v = lhs.getInt(line());
-	int rhs_v = rhs_closure.eval(rt).getInt(line());
+    GTOp.bin_eval(BinArguments args, Runtime rt) {
+	args.prepare(rt);
+	int lhs_v = args.getLHS(rt).getInt(line());
+	int rhs_v = args.getRHS(rt).getInt(line());
 	if (lhs_v > rhs_v) {
 	    return True();
 	}
@@ -117,8 +169,10 @@ aspect Eval {
     }
 
     public Value
-    EqOp.bin_eval(Value lhs, EvalInterface rhs_closure, Runtime rt) {
-	if (lhs.equalTo(rhs_closure.eval(rt), config())) {
+    EqOp.bin_eval(BinArguments args, Runtime rt) {
+	args.prepare(rt);
+	Value lhs = args.getLHS(rt);
+	if (lhs.equalTo(args.getRHS(rt), config())) {
 	    return True();
 	}
 	return False();
@@ -126,14 +180,16 @@ aspect Eval {
     }
 
     public Value
-    AndOp.bin_eval(Value lhs, EvalInterface rhs_closure_in, Runtime rt) {
-	int lhs_v = lhs.getInt(line());
-	EvalInterface rhs_closure = this.config().short_circuit_evaluation.get().processClosure(rhs_closure_in, rt);
+    AndOp.bin_eval(BinArguments args, Runtime rt) {
+	this.config().short_circuit_evaluation.get().preprocessArgs(args, rt);
 
-	if (0 != lhs_v) {
-	    int rhs_v = rhs_closure.eval(rt).getInt(line());
+	Value first = this.config().operand_evaluation_order.get().getValue(args, rt, true);
+	int first_v = first.getInt(line());
 
-	    if (0 != rhs_v) {
+	if (0 != first_v) {
+	    int second_v = this.config().operand_evaluation_order.get().getValue(args, rt, false).getInt(line());
+
+	    if (0 != second_v) {
 		return True();
 	    }
 	}

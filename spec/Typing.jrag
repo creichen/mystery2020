@@ -1,6 +1,7 @@
 import mystery2020.MType;
 import mystery2020.MinMax;
 import mystery2020.InvalidSubrangeException;
+import mystery2020.runtime.Runtime;
 
 /**
  * General type assignment (independent of specific typing schemes)
@@ -17,33 +18,95 @@ aspect Typing {
 	when getMinMax().getMin() > getMinMax().getMax()
 	to Program.generalStaticErrors();
 
-    syn MType Type.getMType();
+    syn MType Type.getMType(Runtime rt);
 
-    eq UnknownType.getMType() = MType.ANY;
-    eq IntType.getMType() = MType.INTEGER;
-    eq SubrangeType.getMType() = MType.SUBRANGE(getSubrange().getMinMax());
-    eq ArrayType.getMType() { throw new RuntimeException("Unsupported"); }
-    eq NamedType.getMType() { throw new RuntimeException("Unsupported"); }
-    eq UnitType.getMType() = MType.UNIT;
-    eq ProcType.getMType() {
+    eq UnknownType.getMType(Runtime rt) = MType.ANY;
+    eq IntType.getMType(Runtime rt) = MType.INTEGER;
+    eq SubrangeType.getMType(Runtime rt) = MType.SUBRANGE(getSubrange().getMinMax());
+    eq ArrayType.getMType(Runtime rt) { return MType.ARRAY(getSubrange().getMinMax(), getElementType().getMType(rt)); }
+    eq NamedType.getMType(Runtime rt) { return rt.getDeclaration(this).getDeclaredType(rt); }
+    eq UnitType.getMType(Runtime rt) = MType.UNIT;
+    eq ProcType.getMType(Runtime rt) {
 	MType[] args = new MType[this.getNumFormal()];
-	MType ret = this.getType().getMType();
+	MType ret = this.getType().getMType(rt);
 	for (int i = 0; i < this.getNumFormal(); ++i) {
-	    args[i] = this.getFormal(i).getMType();
+	    args[i] = this.getFormal(i).getMType(rt);
 	}
 	return MType.PROCEDURE(args, ret);
     }
 
-    syn MType VarDecl.getMType();
-    eq VarDecl.getMType() = getType().getMType();
+    syn MType VarDecl.getMType(Runtime rt);
+    eq VarDecl.getMType(Runtime rt) = getType().getMType(rt);
 
-    syn MType ProcDecl.getMType();
-    eq ProcDecl.getMType() {
+    syn MType ProcDecl.getMType(Runtime rt);
+    eq ProcDecl.getMType(Runtime rt) {
 	MType[] args = new MType[this.getNumDecl()];
-	MType ret = this.getType().getMType();
+	MType ret = this.getType().getMType(rt);
 	for (int i = 0; i < this.getNumDecl(); ++i) {
-	    args[i] = this.getDecl(i).getMType();
+	    args[i] = this.getDecl(i).getMType(rt);
 	}
 	return MType.PROCEDURE(args, ret);
     }
+
+    // ========================================
+    // Type lookup
+
+    public interface TypeLookupInterface {
+	MType getDeclaredType(Runtime rt);
+    }
+
+    Decl implements TypeLookupInterface;
+
+    public MType
+    VarDecl.getDeclaredType(Runtime rt) {
+	throw new mystery2020.InvalidVariableKindException(line(), "Trying to use value as type: " + this.getName());
+    }
+
+    public MType
+    TypeDecl.getDeclaredType(Runtime rt) {
+	// fixme: use nominal types if we are doing nominal typing
+	//this.getName();
+	return this.getType().getMType(rt);
+    }
+
+    public MType
+    ProcDecl.getDeclaredType(Runtime rt) {
+	throw new mystery2020.InvalidVariableKindException(line(), "Trying to use value as type: " + this.getName());
+    }
+
+    // // ----------------------------------------
+    // // Expression type computation
+
+    // public MType
+    // BinOp.getMType(MType lhs, MType rhs) {
+    // 	return null;
+    // }
+
+    // public MType
+    // Number.getMType() {
+    // 	return MType.UR_INTEGER;
+    // }
+
+    // public MType
+    // Call.getMType() {
+    // 	return null;
+    // }
+
+    // public MType
+    // ID.getMType() {
+    // 	return null;
+    // }
+
+    // public MType
+    // Subscription.getMType(MType array, MType index) {
+    // 	return null;
+    // }
+
+    // public MType
+    // UnitValue.getMType() {
+    // 	return MType.UNIT;
+    // }
+
+    // // ----------------------------------------
+    // // Statement expected type computations
 }

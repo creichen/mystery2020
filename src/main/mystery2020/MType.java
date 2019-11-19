@@ -2,6 +2,7 @@ package mystery2020;
 
 import mystery2020.runtime.Closure;
 import mystery2020.runtime.Value;
+import mystery2020.runtime.Variable;
 import mystery2020.runtime.VariableVector;
 
 public interface MType {
@@ -52,10 +53,35 @@ public interface MType {
 		}
 	};
 	
-	public static MType INTEGER = new MType() {
+	public static MType UR_INTEGER = new MType() {
+		// for integer literals
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
 			return other == this;
+			// CONFIG DEPENDENT
+		}
+
+		@Override
+		public boolean equalTo(MType other, Configuration config) {
+			return other == this;
+		}
+		
+		@Override
+		public String
+		toString() {
+			return "Integer";
+		}
+		
+		@Override
+		public Value getDefaultValue() {
+			return new Value(this, 0);
+		}
+	};
+	
+	public static MType INTEGER = new MType() {
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			return other == this || other == UR_INTEGER;
 			// CONFIG DEPENDENT
 		}
 
@@ -108,6 +134,16 @@ public interface MType {
 			this.max = max;
 		}
 		
+		public int
+		getMin() {
+			return this.min;
+		}
+		
+		public int
+		getMax() {
+			return this.max;
+		}
+		
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
 			// FIXME: CONFIG DEPENDENT
@@ -132,6 +168,51 @@ public interface MType {
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, this.min);
+		}
+	}
+	
+	static class ArrayType implements MType {
+		private SubrangeType index;
+		private MType values;
+		
+		public ArrayType(SubrangeType index, MType values) {
+			this.index = index;
+			this.values = values;
+		}
+
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			return this == other;
+		}
+
+		@Override
+		public boolean equalTo(MType other, Configuration config) {
+			return this == other;
+		}
+		
+		int
+		length() {
+			return this.index.getMax() - this.index.getMin() + 1;
+		}
+		
+		public int
+		startOffset() {
+			return this.index.getMin();
+		}
+
+		@Override
+		public Value getDefaultValue() {
+			Variable[] vars = new Variable[this.length()];
+			for (int i = 0; i < vars.length; i++) {
+				vars[i] = new Variable(this.values, "<in-array>");
+				vars[i].setValue(this.values.getDefaultValue());
+			}
+			return new Value(this, new VariableVector(vars, this.startOffset()));
+		}
+		
+		@Override
+		public String toString() {
+			return "ARRAY " + this.index + " OF " + this.values;
 		}
 	}
 
@@ -201,12 +282,53 @@ public interface MType {
 		}
 	}
 	
-	public static MType SUBRANGE(final MinMax minmax) {
+	static class NamedType implements MType {
+		private String name;
+		private MType type;
+		
+		public NamedType(String name, MType type) {
+			this.name = name;
+			this.type = type;
+		}
+
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean equalTo(MType other, Configuration config) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Value getDefaultValue() {
+			return new Value(this, this.type.getDefaultValue().getValue());
+		}
+		
+		@Override
+		public String
+		toString() {
+			return this.name;
+		}
+	}
+	
+	public static SubrangeType SUBRANGE(final MinMax minmax) {
 		return new SubrangeType(minmax.getMin(), minmax.getMax());
 	}
 	
 	public static MType PROCEDURE(MType[] arg, MType ret) {
 		return new ProcedureType(arg, ret);
+	}
+	
+	public static MType ARRAY(final MinMax index, MType values) {
+		return new ArrayType(SUBRANGE(index), values);
+	}
+	
+	public static MType NAMED(final String name, final MType body) {
+		return new NamedType(name, body);
 	}
 	
 	public static int

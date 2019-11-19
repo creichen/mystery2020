@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ShortCircuitEvaluation;
 
@@ -92,6 +93,7 @@ public class Configuration {
 			ParameterEvaluationOrder.RightToLeft
 			);
 	public ConfigSubsystem<ParameterEvaluationOrder>.Config parameter_evaluation_order = SUBSYSTEM_parameter_evaluation_order.getConfig(this);
+	
 	private static ConfigSubsystem<ShortCircuitEvaluation> SUBSYSTEM_short_circuit_evaluation = new ConfigSubsystem<>(
 			"Short Circuit Evaluation",
 			"SCE",
@@ -99,6 +101,14 @@ public class Configuration {
 			ShortCircuitEvaluation.OFF
 			);
 	public ConfigSubsystem<ShortCircuitEvaluation>.Config short_circuit_evaluation = SUBSYSTEM_short_circuit_evaluation.getConfig(this);
+	
+	private static ConfigSubsystem<OperandEvaluationOrder> SUBSYSTEM_operand_evaluation_order = new ConfigSubsystem<>(
+			"Operand Evaluation Order",
+			"OEO",
+			OperandEvaluationOrder.LeftToRight,
+			OperandEvaluationOrder.RightToLeft
+			);
+	public ConfigSubsystem<OperandEvaluationOrder>.Config operand_evaluation_order = SUBSYSTEM_operand_evaluation_order.getConfig(this);
 
 	// ==========
 	
