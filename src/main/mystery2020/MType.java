@@ -288,12 +288,26 @@ public abstract class MType {
 
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
-			return this == other;
+			return this.equalTo(other, config);
 		}
 
 		@Override
 		public boolean equalTo(MType other, Configuration config) {
-			return this == other;
+			if (this == other) {
+				return true;
+			}
+			if (other instanceof ArrayType) {
+				ArrayType o = (ArrayType) other;
+				return o.index.equalTo(this.index, config)
+						&& o.values.equalTo(this.values, config);
+			}
+			return false;
+		}
+
+		public boolean
+		isUrType() {
+			// make config dependent
+			return true; // right now all arrays are ur-arrays
 		}
 		
 		int
