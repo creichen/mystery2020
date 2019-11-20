@@ -56,6 +56,28 @@ public abstract class MType {
 		return this.ur_type;
 	}
 
+	/**
+	 * Value-based checks; these are only used after type checking has been passed
+	 * 
+	 * @param node
+	 * @param value
+	 */
+	public void ensureValueIsAssignable(ASTNode<?> node, Value value) {
+		if (!this.allowsValue(value.getValue(), node.config())) {
+			throw new DynamicTypeError(node.line(), "Value " + value + " not allowed for type " + this);
+		}
+	}
+	
+	/**
+	 * Value-based checks; these are only used after type checking has been passed
+	 * 
+	 * @param node
+	 * @param value
+	 */
+	protected boolean allowsValue(Object value, Configuration config) {
+		return true;
+	}
+
 	private boolean ur_type = false;
 	public MType
 	makeUrType() {
@@ -245,6 +267,11 @@ public abstract class MType {
 			return "[" + this.min + " TO " + this.max + "]";
 		}
 		
+		protected boolean allowsValue(Object value, Configuration config) {
+			int v = (Integer) value;
+			return v >= this.min && v <= this.max;
+		}
+
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, this.min);

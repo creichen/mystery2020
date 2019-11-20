@@ -47,6 +47,7 @@ aspect Run {
 	if (dyncheck()) {
 	    owningProcedure().getMType(rt).getProcedureType(this).getRet().ensureCanAssignFrom(this, v.getType());
 	}
+	owningProcedure().getMType(rt).getProcedureType(this).getRet().ensureValueIsAssignable(this, v);
 	return v;
     }
 

@@ -129,6 +129,11 @@ public class Configuration {
 			);
 	public ConfigSubsystem<TypeCheck>.Config type_check = SUBSYSTEM_type_check.getConfig(this);
 	
+	public boolean
+	stronglyTyped() {
+		return this.type_check.get().dynamic_checks() || this.type_check.get().static_checks();
+	}
+	
 	// ==========
 	
 	/**

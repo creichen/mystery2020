@@ -58,6 +58,7 @@ public class Variable {
 	public void
 	checkAndSetValue(ASTNode<?> node, Value v) {
 		this.type.ensureCanAssignFrom(node, v.getType());
+		this.type.ensureValueIsAssignable(node, v);
 		this.setValue(v);
 	}
 	

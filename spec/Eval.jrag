@@ -70,13 +70,19 @@ aspect Eval {
 	rt.runCall(this);
 	Value v = this.getCallee().eval(rt);
 	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
-	if (dyncheck()) {
+	if (config().stronglyTyped()) {
 	    MType.ProcedureType callee_type = v.getType().getProcedureType(this);
 	    if (callee_type.getArgs().length != actuals.size()) {
 		throw new DynamicTypeError(line(), "Wrong number of arguments for call: have " + actuals.size() + " but expected " + callee_type.getArgs().length);
 	    }
+	    if (dyncheck()) {
+		for (int i = 0; i < actuals.size(); i++) {
+		    callee_type.getArgs()[i].ensureCanAssignFrom(this, actuals.get(i).getType());
+		}
+	    }
 	    for (int i = 0; i < actuals.size(); i++) {
-		callee_type.getArgs()[i].ensureCanAssignFrom(this, actuals.get(i).getType());
+		// DISABLE THIS CHECK FOR PASS-BY-NAME and PASS-BY-NEED
+		callee_type.getArgs()[i].ensureValueIsAssignable(this, actuals.get(i).getValue());
 	    }
 	}
 	return v.call(rt, line(), actuals);
