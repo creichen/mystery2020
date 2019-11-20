@@ -78,27 +78,27 @@ public class Interpreter {
 
 	private static void
 	run(String[] args) {
-        String filename = getFilename(args);
+		String filename = getFilename(args);
+		Runtime rt = new Runtime(Interpreter.configuration);
 
-        try {
-        	// Construct the AST
-        	Program m;
-		if (filename.equals(READ_FROM_STDIN)) {
-			m = parse(new InputStreamReader(System.in));
-		} else {
-			m = parseFile(filename);
+		try {
+			// Construct the AST
+			Program m;
+			if (filename.equals(READ_FROM_STDIN)) {
+				m = parse(new InputStreamReader(System.in));
+			} else {
+				m = parseFile(filename);
+			}
+			m.setConfiguration(Interpreter.configuration);
+			m.run(rt);
+		} catch (IOException exn) {
+			throw new RuntimeException(exn);
+		} catch (MysteryException exn) {
+			System.err.println(exn);
 		}
-        	m.setConfiguration(Interpreter.configuration);
-        	Runtime rt = new Runtime(Interpreter.configuration);
-        	m.run(rt);
-        	for (String s : rt.getOutput()) {
-        		System.out.println(s);
-        	}
-        } catch (IOException exn) {
-        	throw new RuntimeException(exn);
-        } catch (MysteryException exn) {
-		System.err.println(exn);
-	}
+		for (String s : rt.getOutput()) {
+			System.out.println(s);
+		}
 	}
 
 	private static void
@@ -133,11 +133,12 @@ public class Interpreter {
 		System.out.println("  For example:\n");
 		System.out.println("     2r        selects precedence 2 (lower than 3, higher than 1), right-associativity.");
 		System.out.println("  The order in which these pairs are specified for the different operators is:");
+
 		for (Configuration.Op op : Configuration.Op.values()) {
 			System.out.println("    " + op);
 		}
 		for (ConfigSubsystem<?> subsys : Configuration.getSubsystems()) {
-			System.out.println("\nSubsystem " + subsys.getCode() + " :");
+			System.out.println("\nSubsystem " + subsys.getCode() + " : " + subsys.getName());
 			for (int i = 0; i < subsys.size(); i++) {
 				ConfigOption<?> opt = subsys.getAt(i);
 				System.out.println("    " + pad(opt.getCode(), 10) + opt.getName());

@@ -76,5 +76,4 @@ public class ConfigSubsystem<T extends ConfigOption<T>> {
 		configuration.setSubsystem(config_index, conf);
 		return conf;
 	}
-
 }

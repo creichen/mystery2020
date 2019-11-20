@@ -8,21 +8,33 @@ import mystery2020.runtime.VariableVector;
 
 public abstract class MType {
 	/**
-	 * Check whether the other type can be widened to this type
 	 *
 	 * @param other
 	 * @param config
 	 * @return true iff the other type can be converted to this type
 	 */
-	public abstract boolean convertibleFrom(MType other, Configuration config);
-	
 	public boolean
-	convertibleTo(MType other, Configuration config) {
-		return other.convertibleFrom(this, config);
+	convertibleFromForeignType(MType other, Configuration config) {
+		return false;
 	}
 	
-	public abstract boolean
-	equalTo(MType other, Configuration config);
+	public final boolean
+	convertibleTo(MType other, Configuration config) {
+		return this == other
+				|| this.equalTo(other, config)
+				|| other.convertibleFromForeignType(this, config);
+	}
+	
+	public final boolean
+	equalTo(MType other, Configuration config) {
+		MTypeComparison comp = new MTypeComparison(config);
+		return comp.isEq(this, other);
+	}
+	
+	public boolean
+	isStructurallyEqual(MType other, MTypeComparison comp) {
+		return other == this;
+	}
 
 	public boolean
 	valueEquals(Object v1, Object v2, Configuration config) {
@@ -56,6 +68,12 @@ public abstract class MType {
 		return this.ur_type;
 	}
 
+	public NamedType
+	namedType() {
+		return null;
+	}
+	
+	
 	/**
 	 * Value-based checks; these are only used after type checking has been passed
 	 * 
@@ -100,15 +118,10 @@ public abstract class MType {
 	
 	public static MType ANY = new MType() {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return true;
 		}
 
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
-			return other == this;
-		}
-		
 		@Override
 		public String
 		toString() {
@@ -123,15 +136,10 @@ public abstract class MType {
 
 	public static MType ERROR = new MType() {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return true;
 		}
 
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
-			return other == this;
-		}
-		
 		@Override
 		public String
 		toString() {
@@ -147,20 +155,9 @@ public abstract class MType {
 	// the integer top element (for integer literals)
 	public static class IntegerType extends MType {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return other == this;
-			// CONFIG DEPENDENT
-		}
-
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
-			return other == this;
-		}
-		
-		@Override
 		public String
 		toString() {
-			return "Integer";
+			return "INTEGER";
 		}
 		
 		@Override
@@ -171,10 +168,10 @@ public abstract class MType {
 		// Return the more specific type or null for failure
 		public IntegerType
 		plusMerge(IntegerType other, Configuration config) {
-			if (this.convertibleFrom(other, config)) {
+			if (other.convertibleTo(this, config)) {
 				return this;
 			}
-			if (other.convertibleFrom(this, config)) {
+			if (this.convertibleTo(other, config)) {
 				return other;
 			}
 			return null;
@@ -182,10 +179,6 @@ public abstract class MType {
 	};
 	
 	public static MType UR_INTEGER = new IntegerType() {
-		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return other == this;
-		}
 		@Override
 		public boolean
 		isUrType() {
@@ -195,9 +188,7 @@ public abstract class MType {
 	
 	public static MType INTEGER = new IntegerType() {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			// CONFIG DEPENDENT
-			//return other == this || other == UR_INTEGER;
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType;
 		}
 	};
@@ -205,27 +196,16 @@ public abstract class MType {
 	// A type that is compatible with any integer type
 	public static MType ANY_INTEGER = new IntegerType() {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType;
 		}
 	};
 	
 	public static MType UNIT = new MType() {
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return other == this;
-			// CONFIG DEPENDENT
-		}
-
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
-			return other == this;
-		}
-		
-		@Override
 		public String
 		toString() {
-			return "Unit";
+			return "UNIT";
 		}
 		
 		@Override
@@ -253,7 +233,7 @@ public abstract class MType {
 		}
 		
 		@Override
-		public boolean equalTo(MType other, Configuration config) {
+		public boolean isStructurallyEqual(MType other, MTypeComparison comp) {
 			if (other instanceof SubrangeType) {
 				SubrangeType other_interval = (SubrangeType) other;
 				return other_interval.min == this.min && other_interval.max == this.max;
@@ -277,7 +257,7 @@ public abstract class MType {
 			return new Value(this, this.min);
 		}
 
-		public boolean convertibleFrom(MType other, Configuration config) {
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			// CONFIG DEPENDENT
 			if (other instanceof SubrangeType) {
 				SubrangeType other_s = (SubrangeType)other;
@@ -314,19 +294,14 @@ public abstract class MType {
 		}
 
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return this.equalTo(other, config);
-		}
-
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
+		public boolean isStructurallyEqual(MType other, MTypeComparison comp) {
 			if (this == other) {
 				return true;
 			}
 			if (other instanceof ArrayType) {
 				ArrayType o = (ArrayType) other;
-				return o.index.equalTo(this.index, config)
-						&& o.values.equalTo(this.values, config);
+				return comp.isEq(o.index, this.index)
+						&& comp.isEq(o.values, this.values);
 			}
 			return false;
 		}
@@ -390,25 +365,20 @@ public abstract class MType {
 		}
 
 		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return this == other || this.equalTo(other, config);
-		}
-
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
+		public boolean isStructurallyEqual(MType other, MTypeComparison comp) {
 			if (other == this) {
 				return true;
 			}
 			if (other instanceof ProcedureType) {
 				ProcedureType other_fun = (ProcedureType) other;
-				if (!other_fun.ret.equalTo(this.ret, config)) {
+				if (!comp.isEq(other_fun.ret, this.ret)) {
 					return false;
 				}
 				if (other_fun.args.length != this.args.length) {
 					return false;
 				}
 				for (int i = 0; i < this.args.length; i++) {
-					if (!other_fun.args[i].equalTo(this.args[i], config)) {
+					if (!comp.isEq(other_fun.args[i], this.args[i])) {
 						return false;
 					}
 				}
@@ -462,17 +432,20 @@ public abstract class MType {
 			this.name = name;
 			this.type = type;
 		}
+		
+		public MType
+		getBody() {
+			return this.type;
+		}
 
-		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			return other == this
-					|| other.isUrType() && this.type.convertibleFrom(other, config);
+		public void
+		setBody(MType ty) {
+			this.type = ty;
 		}
 
 		@Override
-		public boolean equalTo(MType other, Configuration config) {
-			// TODO Auto-generated method stub
-			return false;
+		public boolean convertibleFromForeignType(MType other, Configuration config) {
+			return other.isUrType() && other.convertibleTo(this.type, config);
 		}
 
 		@Override
@@ -484,6 +457,12 @@ public abstract class MType {
 		public String
 		toString() {
 			return this.name;
+		}
+		
+		@Override
+		public NamedType
+		namedType() {
+			return this;
 		}
 	}
 	
@@ -499,7 +478,7 @@ public abstract class MType {
 		return new ArrayType(SUBRANGE(index), values);
 	}
 	
-	public static MType NAMED(final String name, final MType body) {
+	public static NamedType NAMED(final String name, final MType body) {
 		return new NamedType(name, body);
 	}
 	

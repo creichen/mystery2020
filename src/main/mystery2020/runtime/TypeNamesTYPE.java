@@ -9,20 +9,34 @@ public abstract class TypeNamesTYPE extends AbstractConfigOption<TypeNamesTYPE> 
 		super(name, code);
 	}
 
+	public abstract MType normaliseType(MType type);
 	// What kind of MType should a  `TYPE name = type' resolve to?
-	public abstract MType nameType(String name, MType type);
+	//public abstract MType nameType(String name, MType type);
 	
 	public static TypeNamesTYPE Structural = new TypeNamesTYPE("Structural", "S") {
+
 		@Override
-		public MType nameType(String name, MType type) {
+		public MType normaliseType(MType type) {
+			while (type.namedType() != null) {
+				type = type.namedType().getBody();
+			}
 			return type;
 		}
+		//@Override
+		//public MType nameType(String name, MType type) {
+//			return type;
+//		}
 	};
 	
 	public static TypeNamesTYPE Nominal = new TypeNamesTYPE("Nominal", "N") {
+
 		@Override
-		public MType nameType(String name, MType type) {
-			return MType.NAMED(name, type);
+		public MType normaliseType(MType type) {
+			return type;
 		}
+		//@Override
+		//public MType nameType(String name, MType type) {
+//			return MType.NAMED(name, type);
+		//}
 	};
 }
