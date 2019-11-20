@@ -15,6 +15,12 @@ aspect StaticErrors {
 	if (!generalStaticErrors().isEmpty()) {
 	    throw generalStaticErrors().get(0);
 	}
+	if (config == null || !config.type_check.get().static_checks()) {
+	    return false;
+	}
+	if (!staticTypeErrors().isEmpty()) {
+	    throw staticTypeErrors().get(0);
+	}
 	return false;
     }
 }

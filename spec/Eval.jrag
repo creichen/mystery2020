@@ -1,6 +1,7 @@
 import beaver.Symbol;
 import mystery2020.IntLiteralException;
 import mystery2020.MType;
+import mystery2020.DynamicTypeError;
 import mystery2020.runtime.Runtime;
 import mystery2020.runtime.VariableVector;
 
@@ -45,7 +46,7 @@ aspect Eval {
     public Value
     Number.eval(Runtime rt) {
 	try {
-	    Value v = new Value(MType.INTEGER, Integer.parseInt(this.getNumber()));
+	    Value v = new Value(MType.UR_INTEGER, Integer.parseInt(this.getNumber()));
 	    return v;
 	} catch (NumberFormatException exn) {
 	    throw new IntLiteralException(line(),
@@ -69,6 +70,15 @@ aspect Eval {
 	rt.runCall(this);
 	Value v = this.getCallee().eval(rt);
 	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
+	if (dyncheck()) {
+	    MType.ProcedureType callee_type = v.getType().getProcedureType(this);
+	    if (callee_type.getArgs().length != actuals.size()) {
+		throw new DynamicTypeError(line(), "Wrong number of arguments for call: have " + actuals.size() + " but expected " + callee_type.getArgs().length);
+	    }
+	    for (int i = 0; i < actuals.size(); i++) {
+		callee_type.getArgs()[i].ensureCanAssignFrom(this, actuals.get(i).getType());
+	    }
+	}
 	return v.call(rt, line(), actuals);
     }
 
@@ -85,12 +95,26 @@ aspect Eval {
 	private Value rhs_value = null;
 	private EvalInterface lhs;
 	private EvalInterface rhs;
+	private Expr lhs_node, rhs_node;
 	ASTNode origin;
 
-	public BinArguments(ASTNode origin, EvalInterface lhs_in, EvalInterface rhs_in) {
+	public BinArguments(ASTNode origin, Expr lhs_node, Expr rhs_node) {
+	    // we carry the nodes over for error reporting
 	    this.origin = origin;
-	    this.lhs = lhs_in;
-	    this.rhs = rhs_in;
+	    this.lhs_node = lhs_node;
+	    this.rhs_node = rhs_node;
+	    this.lhs = lhs_node;
+	    this.rhs = rhs_node;
+	}
+
+	public Expr
+	getLHSNode() {
+	    return this.lhs_node;
+	}
+
+	public Expr
+	getRHSNode() {
+	    return this.rhs_node;
 	}
 
 	/**
@@ -147,19 +171,32 @@ aspect Eval {
     public Value
     AddOp.bin_eval(BinArguments args, Runtime rt) {
 	args.prepare(rt);
-	long lhs_v = args.getLHS(rt).getInt(line());
-	long rhs_v = args.getRHS(rt).getInt(line());
+	Value lhs = args.getLHS(rt);
+	Value rhs = args.getRHS(rt);
+	MType ty = MType.UR_INTEGER;
+	if (dyncheck()) {
+	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), lhs.getType());
+	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getRHSNode(), rhs.getType());
+	    ty = ((MType.IntegerType)lhs.getType()).plusMerge(((MType.IntegerType)rhs.getType()), config());
+	    if (ty == null) {
+		throw new DynamicTypeError(args.getLHSNode().line(), "Incompatible types for addition: " + lhs.getType() + " and " + rhs.getType());
+	    }
+	}
+	long lhs_v = lhs.getInt(line());
+	long rhs_v = rhs.getInt(line());
 	long result = lhs_v + rhs_v;
 	int result_int = (int) result;
 	if (result != result_int) {
 	    // FIXME: optional error handling
 	}
-	return new Value(MType.INTEGER, result_int);
+	return new Value(ty, result_int);
     }
 
     public Value
     GTOp.bin_eval(BinArguments args, Runtime rt) {
 	args.prepare(rt);
+	MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), args.getLHS(rt).getType());
+	MType.ANY_INTEGER.ensureCanAssignFrom(args.getRHSNode(), args.getRHS(rt).getType());
 	int lhs_v = args.getLHS(rt).getInt(line());
 	int rhs_v = args.getRHS(rt).getInt(line());
 	if (lhs_v > rhs_v) {
@@ -184,14 +221,22 @@ aspect Eval {
 	this.config().short_circuit_evaluation.get().preprocessArgs(args, rt);
 
 	Value first = this.config().operand_evaluation_order.get().getValue(args, rt, true);
+	// FIXME: dynamic type checking does not factor in operand eval order
+	MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), first.getType());
 	int first_v = first.getInt(line());
 
 	if (0 != first_v) {
-	    int second_v = this.config().operand_evaluation_order.get().getValue(args, rt, false).getInt(line());
+	    Value second = this.config().operand_evaluation_order.get().getValue(args, rt, false);
+	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), second.getType());
+	    int second_v = second.getInt(line());
 
 	    if (0 != second_v) {
 		return True();
 	    }
+	} else if (!this.config().short_circuit_evaluation.get().isShortCircuit()) {
+	    // may still have do short-circuit dynamic type checking!
+	    Value second = this.config().operand_evaluation_order.get().getValue(args, rt, false);
+	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), second.getType());
 	}
 
 	return False();

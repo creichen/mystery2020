@@ -12,6 +12,11 @@ aspect Auxiliary {
 	return Symbol.getColumn(this.getStart());
     }
 
+    public boolean
+    ASTNode.dyncheck() {
+	return this.config().type_check.get().dynamic_checks();
+    }
+
     Value ASTNode.True() {
 	return Value.True(config());
     }

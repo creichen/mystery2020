@@ -45,7 +45,14 @@ aspect Variable {
     }
 
     public Variable Subscription.variable(Runtime rt) {
-	int index = getIndex().eval(rt).getInt(line());
-	return getTarget().eval(rt).getArray(line()).getChecked(line(), index);
+	Value index_v = getIndex().eval(rt);
+	Value target_v = getTarget().eval(rt);
+
+	if (dyncheck()) {
+	    target_v.getType().getArrayType(this).getIndices().ensureCanAssignFrom(this, index_v.getType());
+	}
+
+	int index = index_v.getInt(line());
+	return target_v.getArray(line()).getChecked(line(), index);
     }
 }

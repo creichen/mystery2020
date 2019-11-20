@@ -33,7 +33,8 @@ aspect Run {
 	if (!this.getLHS().isVariable()) {
 	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
 	}
-	this.getLHS().variable(rt).setValue(this.getRHS().eval(rt));
+
+	this.getLHS().variable(rt).checkAndSetValue(this, this.getRHS().eval(rt));
 	// System.err.println("# after assignment " + this + ":");
 	// System.err.println(rt);
 	return null;
@@ -42,7 +43,11 @@ aspect Run {
     public Value
     Return.run(Runtime rt) {
 	rt.runStep(this);
-	return this.getExpr().eval(rt);
+	Value v = this.getExpr().eval(rt);
+	if (dyncheck()) {
+	    owningProcedure().getMType(rt).getProcedureType(this).getRet().ensureCanAssignFrom(this, v.getType());
+	}
+	return v;
     }
 
     public Value
@@ -76,6 +81,7 @@ aspect Run {
     Conditional.run(Runtime rt) {
 	rt.runStep(this);
 	Value cond_val = this.getCond().eval(rt);
+	MType.ANY_INTEGER.ensureCanAssignFrom(this, cond_val.getType());
 	List<Stmt> statements;
 	if (cond_val.getValue().equals(0)) {
 	    statements = this.getFalseBranchStmts();
@@ -93,13 +99,21 @@ aspect Run {
 
     public Value
     While.run(Runtime rt) {
-	while (!this.getCond().eval(rt).getValue().equals(0)) {
-	    rt.runStep(this);
-	    for (Stmt s : this.getStmts()) {
-		Value retval = s.run(rt);
-		if (retval != null) {
-		    return retval;
+	//while (!this.getCond().eval(rt).getValue().equals(0)) {
+	while (true) {
+	    Value cond_val = this.getCond().eval(rt);
+	    MType.ANY_INTEGER.ensureCanAssignFrom(this, cond_val.getType());
+
+	    if (!cond_val.getValue().equals(0)) {
+		rt.runStep(this);
+		for (Stmt s : this.getStmts()) {
+		    Value retval = s.run(rt);
+		    if (retval != null) {
+			return retval;
+		    }
 		}
+	    } else {
+		break;
 	    }
 	}
 	return null;

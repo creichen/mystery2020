@@ -45,7 +45,7 @@ aspect Typing {
 	for (int i = 0; i < this.getNumDecl(); ++i) {
 	    args[i] = this.getDecl(i).getMType(rt);
 	}
-	return MType.PROCEDURE(args, ret);
+	return MType.PROCEDURE(args, ret).makeUrType();
     }
 
     // ========================================
@@ -64,49 +64,11 @@ aspect Typing {
 
     public MType
     TypeDecl.getDeclaredType(Runtime rt) {
-	// fixme: use nominal types if we are doing nominal typing
-	//this.getName();
-	return this.getType().getMType(rt);
+	return this.config().type_names_TYPE.get().nameType(this.getName(), this.getType().getMType(rt));
     }
 
     public MType
     ProcDecl.getDeclaredType(Runtime rt) {
 	throw new mystery2020.InvalidVariableKindException(line(), "Trying to use value as type: " + this.getName());
     }
-
-    // // ----------------------------------------
-    // // Expression type computation
-
-    // public MType
-    // BinOp.getMType(MType lhs, MType rhs) {
-    // 	return null;
-    // }
-
-    // public MType
-    // Number.getMType() {
-    // 	return MType.UR_INTEGER;
-    // }
-
-    // public MType
-    // Call.getMType() {
-    // 	return null;
-    // }
-
-    // public MType
-    // ID.getMType() {
-    // 	return null;
-    // }
-
-    // public MType
-    // Subscription.getMType(MType array, MType index) {
-    // 	return null;
-    // }
-
-    // public MType
-    // UnitValue.getMType() {
-    // 	return MType.UNIT;
-    // }
-
-    // // ----------------------------------------
-    // // Statement expected type computations
 }

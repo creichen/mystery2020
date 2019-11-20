@@ -1,11 +1,12 @@
 package mystery2020;
 
+import AST.ASTNode;
 import mystery2020.runtime.Closure;
 import mystery2020.runtime.Value;
 import mystery2020.runtime.Variable;
 import mystery2020.runtime.VariableVector;
 
-public interface MType {
+public abstract class MType {
 	/**
 	 * Check whether the other type can be widened to this type
 	 *
@@ -13,22 +14,67 @@ public interface MType {
 	 * @param config
 	 * @return true iff the other type can be converted to this type
 	 */
-	public boolean convertibleFrom(MType other, Configuration config);
+	public abstract boolean convertibleFrom(MType other, Configuration config);
 	
-	public default boolean
+	public boolean
 	convertibleTo(MType other, Configuration config) {
 		return other.convertibleFrom(this, config);
 	}
 	
-	public boolean
+	public abstract boolean
 	equalTo(MType other, Configuration config);
-	
-	public default boolean
+
+	public boolean
 	valueEquals(Object v1, Object v2, Configuration config) {
 		return v1.equals(v2);
 	}
+	
+	public void
+	ensureCanAssignFrom(ASTNode<?> node, MType source) {
+		if (node.dyncheck()
+			&& !source.convertibleTo(this, node.config())) {
+			throw new DynamicTypeError(node.line(), "Cannot assign " + source + " to " + this);
+		}
+	}
+	
+	public ArrayType
+	getArrayType(ASTNode<?> node) {
+		throw new DynamicTypeError(node.line(), "Not an array type: " + this);
+	}
 
-	public Value getDefaultValue();
+	public ProcedureType
+	getProcedureType(ASTNode<?> node) {
+		throw new DynamicTypeError(node.line(), "Not a procedure type: " + this);
+	}
+	
+	/**
+	 * Type is machine inferred and thus canbe assigned to named types 
+	 * @return
+	 */
+	public boolean
+	isUrType() {
+		return this.ur_type;
+	}
+
+	private boolean ur_type = false;
+	public MType
+	makeUrType() {
+		this.ur_type = true;
+		return this;
+	}
+
+	public StaticTypeError
+	ensureCanAssignFromStatic(ASTNode<?> node, MType source) {
+		if (source == ERROR) { // already handled elsewhere
+			return null;
+		}
+		if (!source.convertibleTo(this, node.config())) {
+			return new StaticTypeError(node.line(), "Cannot assign " + source + " to " + this);
+		}
+		return null;
+	}
+
+	public abstract Value getDefaultValue();
 	
 	public static MType ANY = new MType() {
 		@Override
@@ -52,9 +98,32 @@ public interface MType {
 			return Value.NOTHING;
 		}
 	};
-	
-	public static MType UR_INTEGER = new MType() {
-		// for integer literals
+
+	public static MType ERROR = new MType() {
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			return true;
+		}
+
+		@Override
+		public boolean equalTo(MType other, Configuration config) {
+			return other == this;
+		}
+		
+		@Override
+		public String
+		toString() {
+			return "Error";
+		}
+
+		@Override
+		public Value getDefaultValue() {
+			return Value.NOTHING;
+		}
+	};
+
+	// the integer top element (for integer literals)
+	public static class IntegerType extends MType {
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
 			return other == this;
@@ -75,30 +144,47 @@ public interface MType {
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, 0);
+		}
+		
+		// Return the more specific type or null for failure
+		public IntegerType
+		plusMerge(IntegerType other, Configuration config) {
+			if (this.convertibleFrom(other, config)) {
+				return this;
+			}
+			if (other.convertibleFrom(this, config)) {
+				return other;
+			}
+			return null;
 		}
 	};
 	
-	public static MType INTEGER = new MType() {
+	public static MType UR_INTEGER = new IntegerType() {
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
-			return other == this || other == UR_INTEGER;
-			// CONFIG DEPENDENT
-		}
-
-		@Override
-		public boolean equalTo(MType other, Configuration config) {
 			return other == this;
 		}
-		
 		@Override
-		public String
-		toString() {
-			return "Integer";
+		public boolean
+		isUrType() {
+			return true;
 		}
-		
+	};
+	
+	public static MType INTEGER = new IntegerType() {
 		@Override
-		public Value getDefaultValue() {
-			return new Value(this, 0);
+		public boolean convertibleFrom(MType other, Configuration config) {
+			// CONFIG DEPENDENT
+			//return other == this || other == UR_INTEGER;
+			return other instanceof IntegerType;
+		}
+	};
+
+	// A type that is compatible with any integer type
+	public static MType ANY_INTEGER = new IntegerType() {
+		@Override
+		public boolean convertibleFrom(MType other, Configuration config) {
+			return other instanceof IntegerType;
 		}
 	};
 	
@@ -126,7 +212,7 @@ public interface MType {
 		}
 	};
 	
-	static class SubrangeType implements MType {
+	public static class SubrangeType extends IntegerType {
 		private int min, max;
 
 		public SubrangeType(int min, int max) {
@@ -144,12 +230,6 @@ public interface MType {
 			return this.max;
 		}
 		
-		@Override
-		public boolean convertibleFrom(MType other, Configuration config) {
-			// FIXME: CONFIG DEPENDENT
-			return false;
-		}
-
 		@Override
 		public boolean equalTo(MType other, Configuration config) {
 			if (other instanceof SubrangeType) {
@@ -169,15 +249,41 @@ public interface MType {
 		public Value getDefaultValue() {
 			return new Value(this, this.min);
 		}
+
+		public boolean convertibleFrom(MType other, Configuration config) {
+			// CONFIG DEPENDENT
+			if (other instanceof SubrangeType) {
+				SubrangeType other_s = (SubrangeType)other;
+				if (this.getMin() > other_s.getMax()) {
+					return false;
+				}
+				if (this.getMax() < other_s.getMin()) {
+					return false;
+				}
+				return true; // still needs dynamic check
+			}
+			//return other == this || other == UR_INTEGER;
+			return other instanceof IntegerType;
+		}
 	}
 	
-	static class ArrayType implements MType {
+	public static class ArrayType extends MType {
 		private SubrangeType index;
 		private MType values;
 		
 		public ArrayType(SubrangeType index, MType values) {
 			this.index = index;
 			this.values = values;
+		}
+		
+		public MType
+		getValues() {
+			return this.values;
+		}
+
+		public SubrangeType
+		getIndices() {
+			return this.index;
 		}
 
 		@Override
@@ -211,12 +317,19 @@ public interface MType {
 		}
 		
 		@Override
+		public ArrayType
+		getArrayType(ASTNode<?> node) {
+			return this;
+		}
+
+
+		@Override
 		public String toString() {
 			return "ARRAY " + this.index + " OF " + this.values;
 		}
 	}
 
-	static class ProcedureType implements MType {
+	public static class ProcedureType extends MType {
 		private MType[] args;
 		private MType ret;
 
@@ -225,14 +338,26 @@ public interface MType {
 			this.ret = ret;
 		}
 		
+		public MType
+		getRet() {
+			return this.ret;
+		}
+		
+		public MType[]
+		getArgs() {
+			return this.args;
+		}
+
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
-			// FIXME: CONFIG DEPENDENT
-			return false;
+			return this == other || this.equalTo(other, config);
 		}
 
 		@Override
 		public boolean equalTo(MType other, Configuration config) {
+			if (other == this) {
+				return true;
+			}
 			if (other instanceof ProcedureType) {
 				ProcedureType other_fun = (ProcedureType) other;
 				if (!other_fun.ret.equalTo(this.ret, config)) {
@@ -249,6 +374,12 @@ public interface MType {
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+		public ProcedureType
+		getProcedureType(ASTNode<?> node) {
+			return this;
 		}
 
 		@Override
@@ -282,7 +413,7 @@ public interface MType {
 		}
 	}
 	
-	static class NamedType implements MType {
+	public static class NamedType extends MType {
 		private String name;
 		private MType type;
 		
@@ -293,8 +424,8 @@ public interface MType {
 
 		@Override
 		public boolean convertibleFrom(MType other, Configuration config) {
-			// TODO Auto-generated method stub
-			return false;
+			return other == this
+					|| other.isUrType() && this.type.convertibleFrom(other, config);
 		}
 
 		@Override

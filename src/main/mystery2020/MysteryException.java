@@ -22,6 +22,11 @@ public abstract class MysteryException extends RuntimeException {
 	getKey() {
 		return this.key;
 	}
+	
+	public void
+	amendMessage(String amendment) {
+		this.message += amendment;
+	}
 
 	public String toString() {
 		return this.key + " " + this.line_nr + (this.message.length() == 0 ? "" : (" " + this.message));

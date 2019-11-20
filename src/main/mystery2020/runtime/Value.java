@@ -1,9 +1,9 @@
 package mystery2020.runtime;
 
 import mystery2020.Configuration;
+import mystery2020.DynamicTypeError;
 import mystery2020.MType;
 import mystery2020.NotAClosureException;
-import mystery2020.TypeException;
 
 public class Value {
 	private MType type;
@@ -60,7 +60,7 @@ public class Value {
 		if (this.value instanceof Integer) {
 			return (Integer) this.value;
 		}
-		throw new TypeException(line_nr, "Non-int (" + this.type.toString() + ") to int");
+		throw new DynamicTypeError(line_nr, "Non-int (" + this.type.toString() + ") to int");
 	}
 	
 	public VariableVector
@@ -68,7 +68,7 @@ public class Value {
 		if (this.value instanceof VariableVector) {
 			return (VariableVector) this.value;
 		}
-		throw new TypeException(line_nr, "Non-array (" + this.type.toString() + ") to array");
+		throw new DynamicTypeError(line_nr, "Non-array (" + this.type.toString() + ") to array");
 	}
 	
 	public static Value

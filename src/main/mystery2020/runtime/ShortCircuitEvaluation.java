@@ -11,12 +11,21 @@ public abstract class ShortCircuitEvaluation extends AbstractConfigOption<ShortC
 	
 	public abstract void
 	preprocessArgs(BinArguments args, Runtime rt);
+	
+	public abstract boolean
+	isShortCircuit();
 
 	public static ShortCircuitEvaluation ON = new ShortCircuitEvaluation("Enabled", "Y") {
 		@Override
 		public void
 		preprocessArgs(BinArguments args, Runtime rt) {
 		}
+		
+		public boolean
+		isShortCircuit() {
+			return true;
+		}
+
 	};
 	
 	public static ShortCircuitEvaluation OFF = new ShortCircuitEvaluation("Disabled", "N") {
@@ -24,6 +33,11 @@ public abstract class ShortCircuitEvaluation extends AbstractConfigOption<ShortC
 		public void
 		preprocessArgs(BinArguments args, Runtime rt) {
 			args.prepare(rt);
+		}
+		
+		public boolean
+		isShortCircuit() {
+			return false;
 		}
 	};
 }

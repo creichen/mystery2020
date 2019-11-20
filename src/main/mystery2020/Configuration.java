@@ -9,6 +9,8 @@ import java.util.Map;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ShortCircuitEvaluation;
+import mystery2020.runtime.TypeCheck;
+import mystery2020.runtime.TypeNamesTYPE;
 
 public class Configuration {
 	// ====================
@@ -110,6 +112,23 @@ public class Configuration {
 			);
 	public ConfigSubsystem<OperandEvaluationOrder>.Config operand_evaluation_order = SUBSYSTEM_operand_evaluation_order.getConfig(this);
 
+	private static ConfigSubsystem<TypeNamesTYPE> SUBSYSTEM_type_names_TYPE = new ConfigSubsystem<>(
+			"Type Names for TYPE",
+			"TNT",
+			TypeNamesTYPE.Structural,
+			TypeNamesTYPE.Nominal
+			);
+	public ConfigSubsystem<TypeNamesTYPE>.Config type_names_TYPE = SUBSYSTEM_type_names_TYPE.getConfig(this);
+	
+	private static ConfigSubsystem<TypeCheck> SUBSYSTEM_type_check = new ConfigSubsystem<>(
+			"Type Checking",
+			"TC",
+			TypeCheck.Dynamic,
+			TypeCheck.Static,
+			TypeCheck.None
+			);
+	public ConfigSubsystem<TypeCheck>.Config type_check = SUBSYSTEM_type_check.getConfig(this);
+	
 	// ==========
 	
 	/**
@@ -117,7 +136,7 @@ public class Configuration {
 	 */
 	public Configuration() {
 	}
-	
+
 	public void
 	setSubsystem(String subsystem_code, String option_code) {
 		if (!Configuration.subsystems_by_name.containsKey(subsystem_code)) {

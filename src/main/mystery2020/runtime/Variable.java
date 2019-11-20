@@ -1,5 +1,6 @@
 package mystery2020.runtime;
 
+import AST.ASTNode;
 import mystery2020.MType;
 
 public class Variable {
@@ -53,7 +54,13 @@ public class Variable {
 	getValue() {
 		return this.value;
 	}
-
+	
+	public void
+	checkAndSetValue(ASTNode<?> node, Value v) {
+		this.type.ensureCanAssignFrom(node, v.getType());
+		this.setValue(v);
+	}
+	
 	/**
 	 * No type checking here, type checking happens at assignments and calls
 	 * 

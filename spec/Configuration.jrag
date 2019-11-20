@@ -1,14 +1,23 @@
 import mystery2020.Configuration;
+import mystery2020.runtime.Runtime;
 
 aspect Configuration {
     private Configuration Program.config = null;
+    private Runtime Program.empty_runtime = null;
 
     public void
     Program.setConfiguration(Configuration config) {
 	this.config = config;
+	this.empty_runtime = new Runtime(config);
     }
 
     eq Program.getBody().config() = this.config;
 
     inh Configuration ASTNode.config();
+
+
+    // emptyrt is used for static type checking (since static type checking clashes with dynamic name lookup)
+    eq Program.getBody().emptyrt() = this.empty_runtime;
+
+    inh Runtime ASTNode.emptyrt();
 }

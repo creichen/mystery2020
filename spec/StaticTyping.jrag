@@ -1,0 +1,279 @@
+import mystery2020.MType;
+import mystery2020.MysteryException;
+import mystery2020.StaticTypeError;
+
+aspect StaticTyping {
+    coll LinkedList<MysteryException> Program.staticTypeErrors();
+
+    interface StaticType {
+	public MType
+	staticType();
+    }
+
+    // ----------------------------------------
+    Decl implements StaticType;
+
+    public MType
+    VarDecl.staticType() {
+	return this.getMType(this.emptyrt());
+    }
+
+    public MType
+    ProcDecl.staticType() {
+	return this.getMType(this.emptyrt());
+    }
+
+    public MType
+    TypeDecl.staticType() {
+	return MType.ERROR;
+    }
+
+    // ----------------------------------------
+    Expr implements StaticType;
+
+    public MType
+    BinOpSequence.staticType() {
+	throw new RuntimeException();
+    }
+
+    public MType
+    BinOp.staticType() {
+	return this.getOperator().staticTypeBinOp(this.getLHS().staticType(),
+						  this.getRHS().staticType());
+    }
+
+    public MType
+    Number.staticType() {
+	return MType.UR_INTEGER;
+    }
+
+    public MType
+    Call.staticType() {
+	MType callee_ty = this.getCallee().staticType();
+	if (callee_ty instanceof MType.ProcedureType) {
+	    MType.ProcedureType pty = (MType.ProcedureType) callee_ty;
+	    return pty.getRet();
+	}
+	return MType.ERROR;
+    }
+
+    public MType
+    ID.staticType() {
+	return this.staticDeclaration().staticType();
+    }
+
+    public MType
+    Subscription.staticType() {
+	MType target_ty = this.getTarget().staticType();
+	if (target_ty instanceof MType.ArrayType) {
+	    return ((MType.ArrayType)target_ty).getValues();
+	}
+	return MType.ERROR;
+    }
+
+    public MType
+    UnitValue.staticType() {
+	return MType.UNIT;
+    }
+
+    // ----------------------------------------
+    interface BinOpStaticType {
+	public MType
+	staticTypeBinOp(MType lhs, MType rhs);
+    }
+
+    Operator implements BinOpStaticType;
+
+    public MType
+    AddOp.staticTypeBinOp(MType lhs, MType rhs) {
+	if (lhs instanceof MType.IntegerType && rhs instanceof MType.IntegerType) {
+	    return ((MType.IntegerType)lhs).plusMerge((MType.IntegerType)rhs, this.config());
+	}
+	return null;
+    }
+
+    public MType
+    GTOp.staticTypeBinOp(MType lhs, MType rhs) {
+	return MType.UR_INTEGER;
+    }
+
+    public MType
+    EqOp.staticTypeBinOp(MType lhs, MType rhs) {
+	return MType.UR_INTEGER;
+    }
+
+    public MType
+    AndOp.staticTypeBinOp(MType lhs, MType rhs) {
+	return MType.UR_INTEGER;
+    }
+
+    // ================================================================================
+    interface StaticTypeChecking {
+	MysteryException checkStaticTypeError();
+    }
+
+    // ----------------------------------------
+    Stmt implements StaticTypeChecking;
+
+    Stmt contributes (checkStaticTypeError())
+	when checkStaticTypeError() != null
+	to Program.staticTypeErrors();
+
+    public MysteryException
+    Assignment.checkStaticTypeError() {
+	return this.getLHS().staticType().ensureCanAssignFromStatic(this, this.getRHS().staticType());
+    }
+
+    public MysteryException
+    Return.checkStaticTypeError() {
+	ProcDecl owner = owningProcedure();
+	if (owner != null) {
+	    MType owner_type = owner.staticType();
+	    if (owner_type instanceof MType.ProcedureType) {
+		return ((MType.ProcedureType)owner_type).getRet().ensureCanAssignFromStatic(this, this.getExpr().staticType());
+	    }
+	    // alt case can't happen, must be symptom of other issue
+	}
+	return null;
+    }
+
+    public MysteryException
+    Block.checkStaticTypeError() {
+	return null; // already checking the inner stmts
+    }
+
+    public MysteryException
+    Conditional.checkStaticTypeError() {
+	return MType.ANY_INTEGER.ensureCanAssignFromStatic(this, this.getCond().staticType());
+    }
+
+    public MysteryException
+    While.checkStaticTypeError() {
+	return MType.ANY_INTEGER.ensureCanAssignFromStatic(this, this.getCond().staticType());
+    }
+
+    public MysteryException
+    Output.checkStaticTypeError() {
+	return null; // anything can be allowed, but the result might be garbage
+    }
+
+    public MysteryException
+    ExprStmt.checkStaticTypeError() {
+	return null; // already checking the expr
+    }
+
+    // ----------------------------------------
+    Expr implements StaticTypeChecking;
+
+    Expr contributes (checkStaticTypeError())
+	when checkStaticTypeError() != null
+	to Program.staticTypeErrors();
+
+    public static MysteryException
+    Expr.multipleChecks(MysteryException ... args) {
+	for (MysteryException e : args) {
+	    if (e != null) {
+		return e;
+	    }
+	}
+	return null;
+    }
+
+    public MysteryException
+    BinOpSequence.checkStaticTypeError() {
+	return null; // mustn't happen
+    }
+
+    public MysteryException
+    BinOp.checkStaticTypeError() {
+	return this.getOperator().checkStaticTypeErrorBinary(this.getLHS(),
+							     this.getRHS());
+    }
+
+    public MysteryException
+    Number.checkStaticTypeError() {
+	return null; // can't go wrong
+    }
+
+    public MysteryException
+    Call.checkStaticTypeError() {
+	MType callee_ty = this.getCallee().staticType();
+	if (!(callee_ty instanceof MType.ProcedureType)) {
+	}
+	MType[] formal_types = ((MType.ProcedureType)callee_ty).getArgs();
+	List<Expr> actuals = this.getActuals();
+	if (formal_types.length != actuals.getNumChild()) {
+	    return new StaticTypeError(line(), "Expected " + formal_types.length + " arguments, received " +  + actuals.getNumChild());
+	}
+	for (int i = 0; i < actuals.getNumChild(); i++) {
+	    MType actual_type = actuals.getChild(i).staticType();
+	    MysteryException err = formal_types[i].ensureCanAssignFromStatic(this, actual_type);
+	    if (err != null) {
+		err.amendMessage(" at parameter #" + (i + 1));
+		return err;
+	    }
+	}
+	return null;
+    }
+
+    public MysteryException
+    ID.checkStaticTypeError() {
+	return null; // can't go wrong
+    }
+
+    public MysteryException
+    Subscription.checkStaticTypeError() {
+	MType index_ty = this.getIndex().staticType();
+	MType target_ty = this.getTarget().staticType();
+	if (!(target_ty instanceof MType.ArrayType)) {
+	    return new StaticTypeError(line(), "Cannot do array subscription on non-array type " + target_ty);
+	}
+	return ((MType.ArrayType)target_ty).getIndices().ensureCanAssignFromStatic(this, index_ty);
+    }
+
+    public MysteryException
+    UnitValue.checkStaticTypeError() {
+	return null; // can't go wrong
+    }
+
+    // ================================================================================
+    interface BinOpTypeChecking {
+	public MysteryException
+	checkStaticTypeErrorBinary(Expr lhs, Expr rhs);
+    }
+
+    Operator implements BinOpTypeChecking;
+
+    protected MysteryException
+    Operator.defaultCheckStaticTypeErrorBinding(Expr lhs, Expr rhs) {
+	return Expr.multipleChecks(MType.ANY_INTEGER.ensureCanAssignFromStatic(lhs, lhs.staticType()),
+				   MType.ANY_INTEGER.ensureCanAssignFromStatic(rhs, rhs.staticType()));
+    }
+
+    public MysteryException
+    AddOp.checkStaticTypeErrorBinary(Expr lhs, Expr rhs) {
+	MysteryException e = this.defaultCheckStaticTypeErrorBinding(lhs, rhs);
+	if (e != null) {
+	    return e;
+	}
+	if (staticTypeBinOp(lhs.staticType(), rhs.staticType()) == null) {
+	    return new StaticTypeError(lhs.line(), "Incompatible types for addition: " + lhs.staticType() + " and " + rhs.staticType());
+	}
+	return null;
+    }
+
+    public MysteryException
+    GTOp.checkStaticTypeErrorBinary(Expr lhs, Expr rhs) {
+	return this.defaultCheckStaticTypeErrorBinding(lhs, rhs);
+    }
+
+    public MysteryException
+    AndOp.checkStaticTypeErrorBinary(Expr lhs, Expr rhs) {
+	return this.defaultCheckStaticTypeErrorBinding(lhs, rhs);
+    }
+
+    public MysteryException
+    EqOp.checkStaticTypeErrorBinary(Expr lhs, Expr rhs) {
+	return null;	// anything goes
+    }
+}
