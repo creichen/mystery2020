@@ -68,7 +68,7 @@ public class Variable {
 	 */
 	public void
 	setValue(Value v) {
-		this.value = v;
+		this.value = new Value(this.type, v.getValue());
 	}
 	
 	@Override
