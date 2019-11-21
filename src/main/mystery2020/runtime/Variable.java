@@ -1,6 +1,7 @@
 package mystery2020.runtime;
 
 import AST.ASTNode;
+import mystery2020.Configuration;
 import mystery2020.MType;
 
 public class Variable {
@@ -56,20 +57,31 @@ public class Variable {
 	}
 	
 	public void
-	checkAndSetValue(ASTNode<?> node, Value v) {
+	checkAndSetValue(ASTNode<?> node, Value v, Configuration config) {
 		this.type.ensureCanAssignFrom(node, v.getType());
 		this.type.ensureValueIsAssignable(node, v);
-		this.setValue(v);
+		this.setValue(v, config);
 	}
 	
 	/**
 	 * No type checking here, type checking happens at assignments and calls
 	 * 
 	 * @param v
+	 * @param config Configuration for special assignment semantics, or null for default semantics
 	 */
 	public void
-	setValue(Value v) {
-		this.value = new Value(this.type, v.getValue());
+	setValue(Value v, Configuration config) {
+		Object raw_value = v.getValue();
+		if (config != null) {
+			if (this.type instanceof MType.ArrayType
+					&& this.value.getValue() instanceof VariableVector
+					&& v.getValue() instanceof VariableVector) {
+				VariableVector lhs = (VariableVector) this.value.getValue();
+				VariableVector rhs = (VariableVector) v.getValue();
+				raw_value = config.array_assignment.get().assign(lhs, rhs, config);
+			}
+		}
+		this.value = new Value(this.type, raw_value);
 	}
 	
 	@Override

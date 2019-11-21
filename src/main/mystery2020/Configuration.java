@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mystery2020.runtime.ArrayAssignmentSemantics;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ShortCircuitEvaluation;
@@ -128,7 +129,15 @@ public class Configuration {
 			TypeCheck.None
 			);
 	public ConfigSubsystem<TypeCheck>.Config type_check = SUBSYSTEM_type_check.getConfig(this);
-	
+
+	private static ConfigSubsystem<ArrayAssignmentSemantics> SUBSYSTEM_array_assignment_semantics = new ConfigSubsystem<>(
+			"Array Assignment",
+			"AA",
+			ArrayAssignmentSemantics.Copy,
+			ArrayAssignmentSemantics.Reference
+			);
+	public ConfigSubsystem<ArrayAssignmentSemantics>.Config array_assignment = SUBSYSTEM_array_assignment_semantics.getConfig(this);
+
 	public boolean
 	stronglyTyped() {
 		return this.type_check.get().dynamic_checks() || this.type_check.get().static_checks();

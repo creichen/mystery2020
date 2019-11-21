@@ -327,7 +327,7 @@ public abstract class MType {
 			Variable[] vars = new Variable[this.length()];
 			for (int i = 0; i < vars.length; i++) {
 				vars[i] = new Variable(this.values, "<in-array>");
-				vars[i].setValue(this.values.getDefaultValue());
+				vars[i].setValue(this.values.getDefaultValue(), null);
 			}
 			return new Value(this, new VariableVector(vars, this.startOffset()));
 		}

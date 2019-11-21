@@ -34,6 +34,11 @@ public class VariableVector {
 		return this.vector[i - this.offset];
 	}
 	
+	public int
+	getOffset() {
+		return this.offset;
+	}
+	
 	public Variable
 	getChecked(int line_nr, int i) {
 		if (i < this.offset || (i - this.offset) >= this.vector.length) {

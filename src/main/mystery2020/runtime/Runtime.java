@@ -25,8 +25,10 @@ public class Runtime {
 	private int calls_taken = 0;
 	private int max_steps_taken = 10000;
 	private int max_calls_taken = 100;
+	private Configuration config;
 
 	public Runtime(Configuration config) {
+		this.config = config;
 		this.setCallLimit(config.getCallLimit());
 		this.setStepsLimit(config.getStepLimit());
 	}
@@ -118,7 +120,8 @@ public class Runtime {
 		// FIXME: pass-by-value only for now
 		Value v = expr.eval(this);
 		Variable var = new Variable(v.getType(), null);
-		var.setValue(v);
+		var.setValue(v.getType().getDefaultValue(), null); // may be needed for array copying
+		var.setValue(v, this.config);
 		return var; 
 	}
 
