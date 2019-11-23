@@ -62,12 +62,17 @@ public class Runtime {
 	setStack(VariableStack new_stack) {
 		this.stack = new_stack;
 	}
+	
+	public Configuration
+	getConfiguration() {
+		return this.config;
+	}
 
 	/**
 	 * Executed before each statement (to bound steps)
 	 */
 	public void
-	runStep(ASTNode n) {
+	runStep(ASTNode<?> n) {
 		if (++this.steps_taken > this.max_steps_taken) {
 			throw new MysteryLimitException(n.line(), "Ran for too long");
 		}
@@ -77,7 +82,7 @@ public class Runtime {
 	 * Execute before each call (to bound recursion depth)
 	 */
 	public void
-	runCall(ASTNode n) {
+	runCall(ASTNode<?> n) {
 		if (++this.calls_taken > this.max_calls_taken) {
 			throw new MysteryLimitException(n.line(), "Ran too many calls");
 		}
@@ -117,12 +122,17 @@ public class Runtime {
 
 	private Variable
 	prepareCallArgument(Expr expr) {
-		// FIXME: pass-by-value only for now
-		Value v = expr.eval(this);
-		Variable var = new Variable(v.getType(), null);
-		var.setValue(v.getType().getDefaultValue(), null); // may be needed for array copying
-		var.setValue(v, this.config);
-		return var; 
+		return this.config.parameter_passing.get().prepareParameter(this, expr);
+	}
+	
+	public void
+	postprocessCallArguments(VariableVector actuals_vector, AST.List<Expr> original_args) {
+		// currently always left-to-right
+		int offset = 0;
+		for (Expr expr : original_args) {
+			Variable var = actuals_vector.get(offset);
+			this.config.parameter_passing.get().postprocessParameter(this, var, expr);
+		}
 	}
 
 	/**

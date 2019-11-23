@@ -9,6 +9,7 @@ import java.util.Map;
 import mystery2020.runtime.ArrayAssignmentSemantics;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
+import mystery2020.runtime.ParameterPassingMode;
 import mystery2020.runtime.ShortCircuitEvaluation;
 import mystery2020.runtime.TypeCheck;
 import mystery2020.runtime.TypeNamesTYPE;
@@ -137,6 +138,18 @@ public class Configuration {
 			ArrayAssignmentSemantics.Reference
 			);
 	public ConfigSubsystem<ArrayAssignmentSemantics>.Config array_assignment = SUBSYSTEM_array_assignment_semantics.getConfig(this);
+	
+	private static ConfigSubsystem<ParameterPassingMode> SUBSYSTEM_parameter_passing_mode = new ConfigSubsystem<>(
+			"Parameter Passing",
+			"PP",
+			ParameterPassingMode.ByValue,
+			ParameterPassingMode.ByResult,
+			ParameterPassingMode.ByValueResult,
+			ParameterPassingMode.ByReference,
+			ParameterPassingMode.ByName,
+			ParameterPassingMode.ByNeed
+			);
+	public ConfigSubsystem<ParameterPassingMode>.Config parameter_passing = SUBSYSTEM_parameter_passing_mode.getConfig(this);
 
 	public boolean
 	stronglyTyped() {

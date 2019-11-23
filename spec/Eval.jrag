@@ -67,6 +67,12 @@ aspect Eval {
 
     public Value
     Call.eval(Runtime rt) {
+	// System.err.println("Evaluating call to " + this.getCallee());
+	// try {
+	//     throw new RuntimeException();
+	// } catch (RuntimeException exn) {
+	//     exn.printStackTrace();
+	// }
 	rt.runCall(this);
 	Value v = this.getCallee().eval(rt);
 	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
@@ -75,17 +81,21 @@ aspect Eval {
 	    if (callee_type.getArgs().length != actuals.size()) {
 		throw new DynamicTypeError(line(), "Wrong number of arguments for call: have " + actuals.size() + " but expected " + callee_type.getArgs().length);
 	    }
-	    if (dyncheck()) {
+	    if (dyncheck()
+		&& config().parameter_passing.get().typeDynamicallyCheckableAtCallTime()) {
 		for (int i = 0; i < actuals.size(); i++) {
 		    callee_type.getArgs()[i].ensureCanAssignFrom(this, actuals.get(i).getType());
 		}
 	    }
-	    for (int i = 0; i < actuals.size(); i++) {
-		// DISABLE THIS CHECK FOR PASS-BY-NAME and PASS-BY-NEED
-		callee_type.getArgs()[i].ensureValueIsAssignable(this, actuals.get(i).getValue());
+	    if (config().parameter_passing.get().assignabilityDynamicallyCheckableAtCallTime()) {
+		for (int i = 0; i < actuals.size(); i++) {
+		    callee_type.getArgs()[i].ensureValueIsAssignable(this, actuals.get(i).getValue());
+		}
 	    }
 	}
-	return v.call(rt, line(), actuals);
+	Value result = v.call(rt, line(), actuals);
+	rt.postprocessCallArguments(actuals, this.getActuals());
+	return result;
     }
 
     public Value

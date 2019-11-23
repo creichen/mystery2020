@@ -9,13 +9,15 @@ import java.util.function.Consumer;
 
 public class Interpreter {
 	private static final Interpreter interpreter = new Interpreter(); // this only exists so we can use :: notation conveniently
-	private static final String VERSION = "0.1.1";
+	private static final String VERSION = "0.2.0";
 
 	public static final String READ_FROM_STDIN = "-";
 
 	static Configuration configuration = new Configuration();
 
 	private static Consumer<String[]> action = Interpreter::run;
+	
+	private static boolean long_exceptions = false;
 
 	private CommandLineOption[] command_line_options = new CommandLineOption[] {
 			new CommandLineOption('v', "Print version number", false, s -> { Interpreter.action = Interpreter::print_version; }),
@@ -24,6 +26,7 @@ public class Interpreter {
 			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }),
 			new CommandLineOption('h', "Print this help", false,      s -> { Interpreter.action = Interpreter::print_help; }),
 			new CommandLineOption('c', "Configure one or more subsystem(s)", true,  s -> Interpreter.configuration.setOptions(s)),
+			new CommandLineOption('d', "Debugging", false, s -> { Interpreter.long_exceptions = true; }),
 			new CommandLineOption('s', "Set the maximum number of steps to execute", true,  s -> Interpreter.configuration.setStepLimit(Integer.parseInt(s))),
 			new CommandLineOption('u', "Set the maximum number of subprogram calls to execute", true,  s -> Interpreter.configuration.setCallLimit(Integer.parseInt(s)))
 	};
@@ -94,6 +97,9 @@ public class Interpreter {
 		} catch (IOException exn) {
 			throw new RuntimeException(exn);
 		} catch (MysteryException exn) {
+			if (Interpreter.long_exceptions) {
+				exn.printStackTrace();
+			}
 			System.err.println(exn);
 		}
 		for (String s : rt.getOutput()) {

@@ -1,13 +1,15 @@
 package mystery2020.runtime;
 
 import AST.ASTNode;
+import AST.Expr;
 import mystery2020.Configuration;
+import mystery2020.InvalidModeException;
 import mystery2020.MType;
 
 public class Variable {
 	private String name;
 	private MType type;
-	private Value value;
+	protected Value value;
 
 	/**
 	 * Constructs a new variable
@@ -26,7 +28,7 @@ public class Variable {
 
 	public void
 	initDefault() {
-		this.value = type.getDefaultValue();
+		this.value = this.type.getDefaultValue();
 	}
 
 	public Variable
@@ -62,7 +64,7 @@ public class Variable {
 		this.type.ensureValueIsAssignable(node, v);
 		this.setValue(v, config);
 	}
-	
+
 	/**
 	 * No type checking here, type checking happens at assignments and calls
 	 * 
@@ -81,6 +83,12 @@ public class Variable {
 				raw_value = config.array_assignment.get().assign(lhs, rhs, config);
 			}
 		}
+		this.internalAssignValue(raw_value, v.getType(), config);
+	}
+
+	// after all value processing is done, this is the  internal value assignment
+	protected void
+	internalAssignValue(Object raw_value, MType type, Configuration config) {
 		this.value = new Value(this.type, raw_value);
 	}
 	
@@ -93,5 +101,151 @@ public class Variable {
 	public void
 	setName(String new_name) {
 		this.name = new_name;
+	}
+	
+	public static class Proxy extends Variable {
+		private Variable remote;
+		protected Configuration config;
+
+		public Proxy(Variable outer_variable, Configuration config) {
+			super(outer_variable.getType(), outer_variable.getName() + ".proxy");
+			this.remote = outer_variable;
+			this.config = config;
+		}
+		
+		public void
+		loadFromRemote() {
+			this.setValue(this.remote.getValue(), this.config);
+		}
+		
+		public Value
+		getAssignedValue() {
+			return super.getValue();
+		}
+
+		public void
+		writeToRemote() {
+			this.remote.setValue(this.getAssignedValue(), this.config);
+		}
+	}
+
+	public static class WriteOnlyProxy extends Proxy{
+		private ASTNode<?> owner;
+
+		public WriteOnlyProxy(Variable remote, Configuration config, ASTNode<?> owner) {
+			super(remote, config);
+			this.owner = owner;
+		}
+		
+		@Override
+		public Value
+		getValue() {
+			throw new InvalidModeException(this.owner.line(), "Cannot read from write-only variable");
+		}
+		
+		@Override
+		public void
+		internalAssignValue(Object raw_value, MType type, Configuration config) {
+			if (this.config.type_check.get().dynamic_checks()) {
+				this.getType().ensureCanAssignFrom(this.owner, type);
+			}
+			super.internalAssignValue(raw_value, type, config);
+		}
+	}
+	
+	public static class Dynamic extends Variable {
+		public Dynamic(MType type, String name) {
+			super(type, name);
+		}
+
+		@Override
+		protected void
+		internalAssignValue(Object raw_value, MType type, Configuration config) {
+			this.value = new Value(type, raw_value);
+		}
+	}
+
+	public static class Lazy extends Dynamic {
+		protected Expr expr;
+		protected Runtime rt;
+
+		public Lazy(MType type, String name, Expr expr, Runtime rt) {
+			super(type, name);
+			this.rt = rt;
+			this.expr = expr;
+		}
+		
+		@Override
+		public Value
+		getValue() {
+			return this.expr.eval(this.rt);
+		}
+
+		protected void
+		assignToVar(Variable var, MType type, Object raw_value) {
+			if (var == null) {
+				throw new InvalidModeException(this.expr.line(), "Cannot write to non-variable expression");
+			}
+			var.checkAndSetValue(this.expr, new Value(type, raw_value), this.rt.getConfiguration());
+		}
+		
+		@Override
+		public void
+		internalAssignValue(Object raw_value, MType type, Configuration config) {
+			Variable var = this.expr.variable(this.rt);
+			if (var == null) {
+				return;
+			}
+			if (config.type_check.get().dynamic_checks()) {
+				var.getType().ensureCanAssignFrom(this.expr, type);
+			}
+			this.assignToVar(var, type, raw_value);
+		}
+	}
+
+	public static class LazyCached extends Lazy {
+		private Variable var;
+		private Value val;
+
+		public LazyCached(MType type, String name, Expr expr, Runtime rt) {
+			super(type, name, expr, rt);
+			this.val = null;
+			this.var = null;
+		}
+
+		private Variable
+		getVar() {
+			if (this.var == null) {
+				this.var = this.expr.variable(this.rt);
+			}
+			return this.var;
+		}
+		
+		@Override
+		public Value
+		getValue() {
+			if (this.val == null) {
+				Variable var = this.getVar();
+				if (var != null) {
+					this.val = var.getValue();
+				} else {
+					this.val = this.expr.eval(this.rt);
+				}
+			}
+			return this.val;
+		}
+		
+		@Override
+		public void
+		internalAssignValue(Object raw_value, MType type, Configuration config) {
+			Variable var = this.getVar();
+			if (var == null) {
+				return;
+			}
+			if (config.type_check.get().dynamic_checks()) {
+				var.getType().ensureCanAssignFrom(this.expr, type);
+			}
+			this.assignToVar(var, type, raw_value);
+		}
 	}
 }
