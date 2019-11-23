@@ -142,7 +142,7 @@ aspect StaticScoping {
     // ========================================
     // Looking up Name Uses
 
-    interface Named {
+    public interface Named {
 	public String name();
     }
     Decl implements Named;

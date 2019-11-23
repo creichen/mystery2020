@@ -2,6 +2,9 @@ package mystery2020.runtime;
 
 import java.util.Stack;
 
+import AST.Decl;
+import AST.VarDecl;
+
 /**
  * A layered stack of locals.
  * 
@@ -11,9 +14,9 @@ import java.util.Stack;
  *
  */
 public class VariableStack {
-	private Stack<VariableVector> stack;
+	private Stack<ActivationRecord> stack;
 
-	private VariableStack(Stack<VariableVector> new_stack) {
+	private VariableStack(Stack<ActivationRecord> new_stack) {
 		this.stack = new_stack;
 	}
 	
@@ -22,7 +25,7 @@ public class VariableStack {
 		if (depth >= this.stack.size()) {
 			throw new RuntimeException("Invalid depth " + depth + ": max is " + this.stack.size());
 		}
-		return this.stack.get(depth).get(index);
+		return this.stack.get(depth).getVariables().get(index);
 	}
 	
 	public void
@@ -31,7 +34,7 @@ public class VariableStack {
 	}
 	
 	public void
-	push(VariableVector vv) {
+	push(ActivationRecord vv) {
 		this.stack.push(vv);
 	}
 	
@@ -61,7 +64,7 @@ public class VariableStack {
 		if (depth > size) {
 			throw new RuntimeException("Can't truncate stack of size " + size + " to " + depth);
 		}
-		Stack<VariableVector> va = new Stack<>();
+		Stack<ActivationRecord> va = new Stack<>();
 		for (int i = 0; i < depth; i++) {
 			va.push(this.stack.get(i));
 		}
@@ -76,8 +79,33 @@ public class VariableStack {
 	 */
 	public VariableStack
 	copy() {
-		Stack<VariableVector> va = new Stack<>();
+		Stack<ActivationRecord> va = new Stack<>();
 		va.addAll(this.stack);
 		return new VariableStack(va);
+	}
+	
+	public Decl
+	findDeclaration(String name) {
+		for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
+			ActivationRecord ar = this.stack.get(s_i);
+			for (Decl decl: ar.getDecls()) {
+				if (((AST.Named)decl).name().equals(name)) {
+					return decl;
+				}
+			}
+		}
+		return null;
+	}
+
+	public Variable getVariable(VarDecl vardecl) {
+		for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
+			ActivationRecord ar = this.stack.get(s_i);
+			for (Decl decl: ar.getDecls()) {
+				if (decl == vardecl) {
+					return ar.get(vardecl.accessIndex());
+				}
+			}
+		}
+		return null;
 	}
 }

@@ -104,20 +104,17 @@ public class Runtime {
 
 	public Decl
 	getDeclaration(ID id) {
-		// FIXME: static scoping only for now
-		return id.staticDeclaration();
+		return this.config.scoping.get().getDeclaration(this, id);
 	}
 
 	public Decl
 	getDeclaration(NamedType id) {
-		// FIXME: static scoping only for now
-		return id.staticDeclaration();
+		return this.config.scoping.get().getDeclaration(this, id);
 	}
 
 	public Variable
 	getVariable(VarDecl var) {
-		// FIXME: static scoping only for now
-		return this.getStack().getVariable(var.accessDepth(), var.accessIndex());
+		return this.config.scoping.get().getVariable(this, var);
 	}
 
 	private Variable

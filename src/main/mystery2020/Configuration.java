@@ -10,6 +10,7 @@ import mystery2020.runtime.ArrayAssignmentSemantics;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ParameterPassingMode;
+import mystery2020.runtime.ScopingMode;
 import mystery2020.runtime.ShortCircuitEvaluation;
 import mystery2020.runtime.TypeCheck;
 import mystery2020.runtime.TypeNamesTYPE;
@@ -150,6 +151,14 @@ public class Configuration {
 			ParameterPassingMode.ByNeed
 			);
 	public ConfigSubsystem<ParameterPassingMode>.Config parameter_passing = SUBSYSTEM_parameter_passing_mode.getConfig(this);
+
+	private static ConfigSubsystem<ScopingMode> SUBSYSTEM_scoping_mode = new ConfigSubsystem<>(
+			"Scoping",
+			"S",
+			ScopingMode.Static,
+			ScopingMode.Dynamic
+			);
+	public ConfigSubsystem<ScopingMode>.Config scoping = SUBSYSTEM_scoping_mode.getConfig(this);
 
 	public boolean
 	stronglyTyped() {

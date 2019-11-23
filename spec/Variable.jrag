@@ -6,9 +6,9 @@ import mystery2020.runtime.Variable;
  */
 aspect Variable {
     interface VariableInterface {
-	Variable variable(Runtime rt);
+	public Variable variable(Runtime rt);
 
-	boolean isVariable();
+	public boolean isVariable();
     }
     Expr implements VariableInterface;
     Decl implements VariableInterface;
@@ -23,7 +23,11 @@ aspect Variable {
     public Variable VarDecl.variable(Runtime rt) {
 	// System.err.println("Grabbing variable " + this + "<"+this.accessDepth()+":"+accessIndex()+">");
 	// System.err.println(rt);
-	return rt.getVariable(this);
+	Variable var = rt.getVariable(this);
+	if (var == null) {
+	    throw new NameException(line(), "Could not load variable: '"+name()+"'");
+	}
+	return var;
     }
 
 

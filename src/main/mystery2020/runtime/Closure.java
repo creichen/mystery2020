@@ -37,7 +37,7 @@ public class Closure {
 	 * @param args
 	 */
 	public void
-	checkAndAdaptActuals(Runtime rt, int line_nr, VariableVector actuals) {
+	checkAndAdaptActuals(Runtime rt, int line_nr, ActivationRecord actuals) {
 		VariableVector formals = this.getFormals(rt);
 		if (formals.size() != actuals.size()) {
 			throw new ParameterCountMismatch(line_nr, "Expected " + formals.size() + ", got " + actuals.size());
@@ -57,8 +57,9 @@ public class Closure {
 		
 		// prepare env for call
 		VariableStack call_env = this.env.copy();
-		checkAndAdaptActuals(rt, line_nr, args);
-		call_env.push(args);
+		ActivationRecord arecord = new ActivationRecord(args, this.proc.getDecls());
+		checkAndAdaptActuals(rt, line_nr, arecord);
+		call_env.push(arecord);
 		rt.setStack(call_env);
 		
 		// call
