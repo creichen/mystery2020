@@ -71,6 +71,7 @@ aspect Run {
 	for (Stmt stmt : this.getStmts()) {
 	    Value retval = stmt.run(rt);
 	    if (retval != null) {
+		rt.getStack().pop();
 		return retval;
 	    }
 	}

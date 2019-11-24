@@ -31,11 +31,13 @@ public class VariableStack {
 	public void
 	pop() {
 		this.stack.pop();
+		//try { throw new RuntimeException(); } catch (Exception exn) { System.err.println("---- pop " + this.stack.size()); exn.printStackTrace(); System.err.println(this); };
 	}
 	
 	public void
 	push(ActivationRecord vv) {
 		this.stack.push(vv);
+		//try { throw new RuntimeException(); } catch (Exception exn) { System.err.println("++++ PUSH " + this.stack.size()); exn.printStackTrace(); System.err.println(this); }
 	}
 	
 	public static VariableStack
@@ -83,13 +85,25 @@ public class VariableStack {
 		va.addAll(this.stack);
 		return new VariableStack(va);
 	}
+
+	public static final boolean CHECK_DYNAMIC_LOOKUP = false;
 	
 	public Decl
 	findDeclaration(String name) {
-		for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
+		if (CHECK_DYNAMIC_LOOKUP) {
+			System.err.println("DYN Looking for decl of " + name + " in stack:" + this);
+		}
+		for (int s_i = this.stack.size() - 1; s_i >= 0; --s_i) {
+		//for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
 			ActivationRecord ar = this.stack.get(s_i);
+			if (CHECK_DYNAMIC_LOOKUP) {
+				System.err.println("  checking AR#" + s_i + ": " + ar);
+			}
 			for (Decl decl: ar.getDecls()) {
 				if (((AST.Named)decl).name().equals(name)) {
+					if (CHECK_DYNAMIC_LOOKUP) {
+						System.err.println("  => found here");
+					}
 					return decl;
 				}
 			}
@@ -98,10 +112,20 @@ public class VariableStack {
 	}
 
 	public Variable getVariable(VarDecl vardecl) {
-		for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
+		if (CHECK_DYNAMIC_LOOKUP) {
+			System.err.println("DYN Looking for vardecl of " + vardecl + " in stack:" + this);
+		}
+		for (int s_i = this.stack.size() - 1; s_i >= 0; --s_i) {
+		//for (int s_i = 0; s_i < this.stack.size(); ++s_i) {
 			ActivationRecord ar = this.stack.get(s_i);
+			if (CHECK_DYNAMIC_LOOKUP) {
+				System.err.println("  checking AR#" + s_i + ": " + ar);
+			}
 			for (Decl decl: ar.getDecls()) {
 				if (decl == vardecl) {
+					if (CHECK_DYNAMIC_LOOKUP) {
+						System.err.println("  => found here");
+					}
 					return ar.get(vardecl.accessIndex());
 				}
 			}

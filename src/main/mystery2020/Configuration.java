@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import mystery2020.runtime.ArrayAssignmentSemantics;
+import mystery2020.runtime.ClosureEnvironmentBinding;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ParameterPassingMode;
@@ -159,6 +160,14 @@ public class Configuration {
 			ScopingMode.Dynamic
 			);
 	public ConfigSubsystem<ScopingMode>.Config scoping = SUBSYSTEM_scoping_mode.getConfig(this);
+
+	private static ConfigSubsystem<ClosureEnvironmentBinding> SUBSYSTEM_closure_environment_binding = new ConfigSubsystem<>(
+			"Environment Binding",
+			"EB",
+			ClosureEnvironmentBinding.Deep,
+			ClosureEnvironmentBinding.Shallow
+			);
+	public ConfigSubsystem<ClosureEnvironmentBinding>.Config closure_env_binding = SUBSYSTEM_closure_environment_binding.getConfig(this);
 
 	public boolean
 	stronglyTyped() {

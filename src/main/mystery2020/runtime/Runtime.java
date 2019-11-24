@@ -19,8 +19,13 @@ import mystery2020.MysteryLimitException;
  *
  */
 public class Runtime {
-	public ArrayList<String> output = new ArrayList<>();
+	
+	// This stack represents the STATIC LINK structure, not the dynamic links.
+	// In other words, it reflects the static nesting structure of the program,
+	// if you recurse, you'll simply keep updating the same-depth entries in it.
 	public VariableStack stack = VariableStack.createEmpty();
+	
+	public ArrayList<String> output = new ArrayList<>();
 	private int steps_taken = 0;
 	private int calls_taken = 0;
 	private int max_steps_taken = 10000;
@@ -143,6 +148,14 @@ public class Runtime {
 		Variable[] vars = new Variable[args.getNumChild()];
 		args.config().parameter_evaluation_order.get().prepareCallArguments(vars, args, e -> this.prepareCallArgument(e));
 		return new VariableVector(vars);
+	}
+
+	public void
+	pushLookupDepthLimit() {
+	}
+
+	public void
+	popLookupDepthLimit() {
 	}
 
 	@Override

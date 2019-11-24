@@ -4,8 +4,8 @@ import AST.ProcDecl;
 import mystery2020.ParameterCountMismatch;
 
 public class Closure {
-	private ProcDecl proc;
-	private VariableStack env;
+	ProcDecl proc;
+	VariableStack env;
 	
 	public Closure(ProcDecl proc, VariableStack env) {
 		this.proc = proc;
@@ -53,20 +53,7 @@ public class Closure {
 		if (this.env == null) {
 			throw new RuntimeException("Must set environment before calling closure");
 		}
-		VariableStack old_env = rt.getStack();
-		
-		// prepare env for call
-		VariableStack call_env = this.env.copy();
-		ActivationRecord arecord = new ActivationRecord(args, this.proc.getDecls());
-		checkAndAdaptActuals(rt, line_nr, arecord);
-		call_env.push(arecord);
-		rt.setStack(call_env);
-		
-		// call
-		Value result = this.proc.getBody().run(rt);
-		// return to callee
-		rt.setStack(old_env);
-
+		Value result =rt.getConfiguration().scoping.get().callClosure(this, rt, line_nr, args);
 		if (result == null) {
 			return Value.NOTHING; 
 		}
