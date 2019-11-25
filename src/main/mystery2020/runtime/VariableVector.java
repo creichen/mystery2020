@@ -1,5 +1,6 @@
 package mystery2020.runtime;
 
+import mystery2020.Configuration;
 import mystery2020.MysteryArrayOOBException;
 
 /**
@@ -61,7 +62,7 @@ public class VariableVector {
 	public String
 	toString() {
 		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < vector.length; i++) {
+		for (int i = 0; i < this.vector.length; i++) {
 			sb.append(" #" + i);
 			sb.append("=" + this.vector[i]);
 		}
@@ -71,5 +72,18 @@ public class VariableVector {
 	public int
 	size() {
 		return this.vector.length;
+	}
+
+	public boolean
+	equalTo(VariableVector other, Configuration config) {
+		if (other.offset != this.offset || other.vector.length != this.vector.length) {
+			return false;
+		}
+		for (int i = 0; i < this.vector.length; i++) {
+			if (!this.vector[i].getValue().equalTo(other.vector[i].getValue(), config)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

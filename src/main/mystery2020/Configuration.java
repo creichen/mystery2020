@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import mystery2020.runtime.ArrayAssignmentSemantics;
+import mystery2020.runtime.ArrayEquality;
 import mystery2020.runtime.ClosureEnvironmentBinding;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
@@ -168,6 +169,14 @@ public class Configuration {
 			ClosureEnvironmentBinding.Shallow
 			);
 	public ConfigSubsystem<ClosureEnvironmentBinding>.Config closure_env_binding = SUBSYSTEM_closure_environment_binding.getConfig(this);
+
+	private static ConfigSubsystem<ArrayEquality> SUBSYSTEM_array_equality = new ConfigSubsystem<>(
+			"Array Equality",
+			"AEQ",
+			ArrayEquality.Structural,
+			ArrayEquality.Reference
+			);
+	public ConfigSubsystem<ArrayEquality>.Config array_equality = SUBSYSTEM_array_equality.getConfig(this);
 
 	public boolean
 	stronglyTyped() {

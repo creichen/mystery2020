@@ -40,7 +40,7 @@ public abstract class MType {
 	valueEquals(Object v1, Object v2, Configuration config) {
 		return v1.equals(v2);
 	}
-	
+
 	public void
 	ensureCanAssignFrom(ASTNode<?> node, MType source) {
 		if (node.dyncheck()
@@ -291,6 +291,15 @@ public abstract class MType {
 		public SubrangeType
 		getIndices() {
 			return this.index;
+		}
+
+		@Override
+		public boolean
+		valueEquals(Object v1, Object v2, Configuration config) {
+			if (v1 instanceof VariableVector && v2 instanceof VariableVector) {
+				return config.array_equality.get().isEqual((VariableVector) v1, (VariableVector) v2, config);
+			}
+			return false;
 		}
 
 		@Override
