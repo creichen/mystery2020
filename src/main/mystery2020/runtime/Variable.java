@@ -168,17 +168,23 @@ public class Variable {
 	public static class Lazy extends Dynamic {
 		protected Expr expr;
 		protected Runtime rt;
+		protected VariableStack stack;
 
 		public Lazy(MType type, String name, Expr expr, Runtime rt) {
 			super(type, name);
 			this.rt = rt;
+			this.stack = rt.getStack().copy();
 			this.expr = expr;
 		}
 		
 		@Override
 		public Value
 		getValue() {
-			return this.expr.eval(this.rt);
+			final VariableStack old_stack = this.rt.getStack();
+			this.rt.setStack(this.stack);
+			Value v = this.expr.eval(this.rt);
+			this.rt.setStack(old_stack);
+			return v;
 		}
 
 		protected void
@@ -229,7 +235,7 @@ public class Variable {
 				if (var != null) {
 					this.val = var.getValue();
 				} else {
-					this.val = this.expr.eval(this.rt);
+					this.val = super.getValue();
 				}
 			}
 			return this.val;
