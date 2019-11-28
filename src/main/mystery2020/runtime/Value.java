@@ -85,7 +85,8 @@ public class Value {
 	equalTo(Object other, Configuration config) {
 		if (other instanceof Value) {
 			Value v = (Value) other;
-			return this.getType().equalTo(v.getType(), config) && this.getType().valueEquals(this.getValue(), v.getValue(), config);
+			return this.getType().equalTo(v.getType(), config)
+					&& this.getType().valueEquals(this.getValue(), v.getValue(), config);
 		}
 		return false;
 	}

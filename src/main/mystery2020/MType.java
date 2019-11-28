@@ -176,6 +176,11 @@ public abstract class MType {
 			}
 			return null;
 		}
+		
+		public boolean
+		valueEquals(Object v1, Object v2, Configuration config) {
+			return v1.equals(v2);
+		}
 	};
 	
 	public static MType UR_INTEGER = new IntegerType() {
@@ -184,12 +189,25 @@ public abstract class MType {
 		isUrType() {
 			return true;
 		}
+
+		@Override
+		public boolean
+		isStructurallyEqual(MType other, MTypeComparison comp) {
+			return other == UR_INTEGER || other == INTEGER || other == ANY_INTEGER;
+		}
+
 	};
 	
 	public static MType INTEGER = new IntegerType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType;
+		}
+		
+		@Override
+		public boolean
+		isStructurallyEqual(MType other, MTypeComparison comp) {
+			return other == UR_INTEGER || other == INTEGER || other == ANY_INTEGER;
 		}
 	};
 
@@ -198,6 +216,12 @@ public abstract class MType {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType;
+		}
+
+		@Override
+		public boolean
+		isStructurallyEqual(MType other, MTypeComparison comp) {
+			return other == UR_INTEGER || other == INTEGER || other == ANY_INTEGER;
 		}
 	};
 	
