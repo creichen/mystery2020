@@ -45,6 +45,7 @@ public class Value {
 	call(Runtime rt, int line, VariableVector args) {
 		if (this.value instanceof Closure) {
 			return ((Closure)this.value).call(rt, line, args);
+			
 		}
 		throw new NotAClosureException(line, "Cannot be called: " + this);
 	}
@@ -73,12 +74,12 @@ public class Value {
 	
 	public static Value
 	True(Configuration cfg) {
-		return new Value(MType.INTEGER, 1);
+		return new Value(MType.UR_INTEGER, 1);
 	}
 	
 	public static Value
 	False(Configuration cfg) {
-		return new Value(MType.INTEGER, 0);
+		return new Value(MType.UR_INTEGER, 0);
 	}
 	
 	public boolean

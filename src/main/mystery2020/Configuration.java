@@ -9,9 +9,11 @@ import java.util.Map;
 import mystery2020.runtime.ArrayAssignmentSemantics;
 import mystery2020.runtime.ArrayEquality;
 import mystery2020.runtime.ClosureEnvironmentBinding;
+import mystery2020.runtime.LiteralType;
 import mystery2020.runtime.OperandEvaluationOrder;
 import mystery2020.runtime.ParameterEvaluationOrder;
 import mystery2020.runtime.ParameterPassingMode;
+import mystery2020.runtime.ProcedureSubtyping;
 import mystery2020.runtime.ScopingMode;
 import mystery2020.runtime.ShortCircuitEvaluation;
 import mystery2020.runtime.TypeCheck;
@@ -177,6 +179,34 @@ public class Configuration {
 			ArrayEquality.Reference
 			);
 	public ConfigSubsystem<ArrayEquality>.Config array_equality = SUBSYSTEM_array_equality.getConfig(this);
+	
+	private static ConfigSubsystem<ProcedureSubtyping> SUBSYSTEM_procedure_arg_subtyping = new ConfigSubsystem<>(
+			"Procedure Argument Subtyping",
+			"PSA",
+			ProcedureSubtyping.Invariant,
+			ProcedureSubtyping.Covariant,
+			ProcedureSubtyping.Contravariant,
+			ProcedureSubtyping.Bivariant
+			);
+	public ConfigSubsystem<ProcedureSubtyping>.Config procedure_arg_subtyping = SUBSYSTEM_procedure_arg_subtyping.getConfig(this);
+
+	private static ConfigSubsystem<ProcedureSubtyping> SUBSYSTEM_procedure_return_subtyping = new ConfigSubsystem<>(
+			"Procedure Return Subtyping",
+			"PSR",
+			ProcedureSubtyping.Invariant,
+			ProcedureSubtyping.Covariant,
+			ProcedureSubtyping.Contravariant,
+			ProcedureSubtyping.Bivariant
+			);
+	public ConfigSubsystem<ProcedureSubtyping>.Config procedure_return_subtyping = SUBSYSTEM_procedure_return_subtyping.getConfig(this);
+	
+	private static ConfigSubsystem<LiteralType> SUBSYSTEM_literal_type = new ConfigSubsystem<>(
+			"Literal Number Type",
+			"LT",
+			LiteralType.Integer,
+			LiteralType.Subrange
+			);
+	public ConfigSubsystem<LiteralType>.Config literal_type = SUBSYSTEM_literal_type.getConfig(this);
 
 	public boolean
 	stronglyTyped() {
@@ -188,9 +218,9 @@ public class Configuration {
 	/**
 	 * Constructs a default configuration
 	 */
+
 	public Configuration() {
 	}
-
 	public void
 	setSubsystem(String subsystem_code, String option_code) {
 		if (!Configuration.subsystems_by_name.containsKey(subsystem_code)) {

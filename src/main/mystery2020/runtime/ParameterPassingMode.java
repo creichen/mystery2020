@@ -2,6 +2,7 @@ package mystery2020.runtime;
 
 import AST.Expr;
 import mystery2020.AbstractConfigOption;
+import mystery2020.Configuration;
 import mystery2020.MType;
 
 public abstract class ParameterPassingMode extends AbstractConfigOption<ParameterPassingMode> {
@@ -10,7 +11,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	}
 	
 	// before call
-	public abstract Variable prepareParameter(Runtime runtime, Expr expr);
+	public abstract Variable prepareParameter(Runtime runtime, Expr expr, MType type, Configuration config);
 	// after call
 	public abstract void postprocessParameter(Runtime runtime, Variable var, Expr expr);
 	
@@ -54,7 +55,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	// ========== 
 	public static ParameterPassingMode ByValue = new ParameterPassingMode("Pass by Value", "V") {
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			return this.createValueParameter(rt, expr);
 		}
 
@@ -68,11 +69,11 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public static ParameterPassingMode ByResult = new ParameterPassingMode("Pass by Result", "R") {
 
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			Variable var = expr.variable(rt);
 			if (var == null) {
 				expr.eval(rt);
-				var = new Variable(MType.ANY, "<temp>");
+				var = new Variable(type, "<temp>");
 			}
 			return new Variable.WriteOnlyProxy(var, rt.getConfiguration(), expr); 
 		}
@@ -94,7 +95,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public static ParameterPassingMode ByValueResult = new ParameterPassingMode("Pass by Value-Result", "C") {
 
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			Variable var = expr.variable(rt);
 			if (var == null) {
 				Value val = expr.eval(rt);
@@ -117,7 +118,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public static ParameterPassingMode ByReference = new ParameterPassingMode("Pass by Reference", "P") {
 
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			Variable var = expr.variable(rt);
 			if (var != null) {
 				return var;
@@ -135,7 +136,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public static ParameterPassingMode ByName = new ParameterPassingMode("Pass by Name", "N") {
 
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			return new Variable.Lazy(this.getType(rt, expr), "<outmode-arg>", expr, rt);
 		}
 
@@ -154,7 +155,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public static ParameterPassingMode ByNeed = new ParameterPassingMode("Pass by Need", "E") {
 
 		@Override
-		public Variable prepareParameter(Runtime rt, Expr expr) {
+		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
 			return new Variable.LazyCached(this.getType(rt, expr), "<outmode-arg>", expr, rt); 
 		}
 

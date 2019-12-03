@@ -125,7 +125,9 @@ public class Variable {
 
 		public void
 		writeToRemote() {
-			this.remote.setValue(this.getAssignedValue(), this.config);
+			if (this.getAssignedValue() != null) {
+				this.remote.setValue(this.getAssignedValue(), this.config);
+			}
 		}
 	}
 

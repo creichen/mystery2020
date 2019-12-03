@@ -43,16 +43,20 @@ aspect Eval {
 	throw new RuntimeException("Not supported; should have been rewritten");
     }
 
-    public Value
-    Number.eval(Runtime rt) {
+    public int
+    Number.literalInt() {
 	try {
-	    Value v = new Value(MType.UR_INTEGER, Integer.parseInt(this.getNumber()));
-	    return v;
+	    return Integer.parseInt(this.getNumber());
 	} catch (NumberFormatException exn) {
 	    throw new IntLiteralException(line(),
 					  Symbol.getColumn(this.getStart()),
 					  this.getNumber());
 	}
+    }
+
+    public Value
+    Number.eval(Runtime rt) {
+	return config().literal_type.get().value(this);
     }
 
     public Value
@@ -75,7 +79,7 @@ aspect Eval {
 	// }
 	rt.runCall(this);
 	Value v = this.getCallee().eval(rt);
-	VariableVector actuals = rt.prepareCallArguments(this.getActuals());
+	VariableVector actuals = rt.prepareCallArguments(this.getActuals(), v.getType().getProcedureType(this).getArgs());
 	if (config().stronglyTyped()) {
 	    MType.ProcedureType callee_type = v.getType().getProcedureType(this);
 	    if (callee_type.getArgs().length != actuals.size()) {

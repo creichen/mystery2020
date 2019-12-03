@@ -10,6 +10,7 @@ import AST.ID;
 import AST.NamedType;
 import AST.VarDecl;
 import mystery2020.Configuration;
+import mystery2020.MType;
 import mystery2020.MysteryLimitException;
 
 /**
@@ -123,8 +124,8 @@ public class Runtime {
 	}
 
 	private Variable
-	prepareCallArgument(Expr expr) {
-		return this.config.parameter_passing.get().prepareParameter(this, expr);
+	prepareCallArgument(Expr expr, MType type) {
+		return this.config.parameter_passing.get().prepareParameter(this, expr, type, config);
 	}
 	
 	public void
@@ -144,9 +145,9 @@ public class Runtime {
 	 * @return
 	 */
 	public VariableVector
-	prepareCallArguments(AST.List<Expr> args) {
+	prepareCallArguments(AST.List<Expr> args, MType[] formal_types) {
 		Variable[] vars = new Variable[args.getNumChild()];
-		args.config().parameter_evaluation_order.get().prepareCallArguments(vars, args, e -> this.prepareCallArgument(e));
+		args.config().parameter_evaluation_order.get().prepareCallArguments(vars, formal_types, args, (e, t) -> this.prepareCallArgument(e, t));
 		return new VariableVector(vars);
 	}
 

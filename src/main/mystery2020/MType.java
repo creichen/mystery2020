@@ -19,10 +19,23 @@ public abstract class MType {
 	}
 	
 	public final boolean
-	convertibleTo(MType other, Configuration config) {
+	isSubtypeOf(MType other, Configuration config) {
 		return this == other
+				|| other == ANY
 				|| this.equalTo(other, config)
-				|| other.convertibleFromForeignType(this, config);
+				|| this.isNontrivialSubtypeOf(other, config);
+	}
+	
+	public boolean
+	isNontrivialSubtypeOf(MType other, Configuration config) {
+		return false;
+	}
+
+	public final boolean
+	convertibleTo(MType other, Configuration config) {
+		return this.isSubtypeOf(other, config)
+				|| other.convertibleFromForeignType(this, config)
+				;
 	}
 	
 	public final boolean
@@ -174,9 +187,18 @@ public abstract class MType {
 			if (this.convertibleTo(other, config)) {
 				return other;
 			}
+			if (other instanceof IntegerType && other instanceof IntegerType) {
+				return (IntegerType) INTEGER;
+			}
 			return null;
 		}
-		
+
+		@Override
+		public boolean
+		isNontrivialSubtypeOf(MType other, Configuration config) {
+			return other instanceof IntegerType && (!(other instanceof SubrangeType));
+		}
+
 		public boolean
 		valueEquals(Object v1, Object v2, Configuration config) {
 			return v1.equals(v2);
@@ -279,6 +301,25 @@ public abstract class MType {
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, this.min);
+		}
+
+		@Override
+		public boolean
+		isNontrivialSubtypeOf(MType other, Configuration config) {
+			if (other instanceof IntegerType && (!(other instanceof SubrangeType))) {
+				return true;
+			}
+			if (other instanceof SubrangeType) {
+				SubrangeType other_s = (SubrangeType)other;
+				if (this.getMin() < other_s.getMin()) {
+					return false;
+				}
+				if (this.getMax() > other_s.getMax()) {
+					return false;
+				}
+				return true;
+			}
+			return false;
 		}
 
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
@@ -395,6 +436,27 @@ public abstract class MType {
 		public MType[]
 		getArgs() {
 			return this.args;
+		}
+
+		@Override
+		public boolean isNontrivialSubtypeOf(MType other_, Configuration config) {
+			if (!(other_ instanceof ProcedureType)) {
+				return false;
+			}
+			ProcedureType other = (ProcedureType) other_;
+			
+			if (other.getArgs().length != this.getArgs().length) {
+				return false;
+			}
+			if (!config.procedure_return_subtyping.get().isSubtypeOf(this.getRet(), other.getRet(), config)) {
+				return false;
+			}
+			for (int i = 0; i < this.getArgs().length; i++) {
+				if (!config.procedure_arg_subtyping.get().isSubtypeOf(this.getArgs()[i], other.getArgs()[i], config)) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		@Override

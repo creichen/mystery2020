@@ -1,4 +1,5 @@
 import mystery2020.MType;
+import mystery2020.MinMax;
 import mystery2020.MysteryException;
 import mystery2020.StaticTypeError;
 
@@ -44,7 +45,7 @@ aspect StaticTyping {
 
     public MType
     Number.staticType() {
-	return MType.UR_INTEGER;
+	return config().literal_type.get().type(this);
     }
 
     public MType
