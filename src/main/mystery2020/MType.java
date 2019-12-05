@@ -223,7 +223,8 @@ public abstract class MType {
 	public static MType INTEGER = new IntegerType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
-			return other instanceof IntegerType;
+			return other instanceof IntegerType
+					|| (other instanceof NamedType && other.namedType().getBody().convertibleTo(this, config));
 		}
 		
 		@Override
