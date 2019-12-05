@@ -179,6 +179,15 @@ public class Variable {
 			this.expr = expr;
 		}
 		
+		protected final Variable
+		var() {
+			final VariableStack old_stack = this.rt.getStack();
+			this.rt.setStack(this.stack);
+			Variable v = this.expr.variable(this.rt);
+			this.rt.setStack(old_stack);
+			return v;
+		}
+		
 		@Override
 		public Value
 		getValue() {
@@ -200,7 +209,7 @@ public class Variable {
 		@Override
 		public void
 		internalAssignValue(Object raw_value, MType type, Configuration config) {
-			Variable var = this.expr.variable(this.rt);
+			Variable var = var();
 			if (var == null) {
 				return;
 			}
@@ -224,7 +233,7 @@ public class Variable {
 		private Variable
 		getVar() {
 			if (this.var == null) {
-				this.var = this.expr.variable(this.rt);
+				this.var = this.var();
 			}
 			return this.var;
 		}
