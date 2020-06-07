@@ -19,7 +19,7 @@ public abstract class VariableStorageBinding extends AbstractConfigOption<Variab
 		@Override
 		public VariableVector
 		getVariableVectorInstance(VariableVector vec, ASTNode node) {
-			return vec.instantiate();
+			return vec.instantiate(node);
 		}
 	};
 
@@ -31,7 +31,7 @@ public abstract class VariableStorageBinding extends AbstractConfigOption<Variab
 		public VariableVector
 		getVariableVectorInstance(VariableVector vec, ASTNode node) {
 			if (!this.static_storage.containsKey(node)) {
-				this.static_storage.put(node, vec.instantiate());
+				this.static_storage.put(node, vec.instantiate(node));
 			}
 			return this.static_storage.get(node);
 		}

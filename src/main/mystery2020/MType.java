@@ -127,7 +127,7 @@ public abstract class MType {
 		return null;
 	}
 
-	public abstract Value getDefaultValue();
+	public abstract Value getDefaultValue(ASTNode node);
 
 	public static MType ANY = new MType() {
 		@Override
@@ -142,7 +142,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return Value.NOTHING;
 		}
 	};
@@ -160,7 +160,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return Value.NOTHING;
 		}
 	};
@@ -174,7 +174,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return new Value(this, 0);
 		}
 
@@ -256,7 +256,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return new Value(this, Value.NOTHING);
 		}
 	};
@@ -300,7 +300,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return new Value(this, this.min);
 		}
 
@@ -398,11 +398,14 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			Variable[] vars = new Variable[this.length()];
+			if (this.length() > Configuration.ARRAY_SIZE_LIMIT) {
+				throw new MysteryLimitException(node.line(), "Array too large");
+			}
 			for (int i = 0; i < vars.length; i++) {
 				vars[i] = new Variable(this.values, "<in-array>");
-				vars[i].setValue(this.values.getDefaultValue(), null);
+				vars[i].setValue(this.values.getDefaultValue(node), null);
 			}
 			return new Value(this, new VariableVector(vars, this.startOffset()));
 		}
@@ -508,7 +511,7 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
+		public Value getDefaultValue(ASTNode node) {
 			return new Value(this, new Closure(null, null) {
 				@Override
 				public Value
@@ -545,8 +548,8 @@ public abstract class MType {
 		}
 
 		@Override
-		public Value getDefaultValue() {
-			return new Value(this, this.type.getDefaultValue().getValue());
+		public Value getDefaultValue(ASTNode node) {
+			return new Value(this, this.type.getDefaultValue(node).getValue());
 		}
 
 		@Override

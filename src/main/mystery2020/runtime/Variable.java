@@ -27,14 +27,14 @@ public class Variable {
 	}
 
 	public void
-	initDefault() {
-		this.value = this.type.getDefaultValue();
+	initDefault(ASTNode node) {
+		this.value = this.type.getDefaultValue(node);
 	}
 
 	public Variable
-	copyAndInit() {
+	copyAndInit(ASTNode node) {
 		Variable v = new Variable(this.type, this.name);
-		v.initDefault();
+		v.initDefault(node);
 		return v;
 	}
 

@@ -53,10 +53,10 @@ public class VariableVector {
 	 * Creates and initialises a (deep) copy of this variable vector
 	 */
 	public VariableVector
-	instantiate() {
+	instantiate(ASTNode owner) {
 		VariableVector retval = new VariableVector(this.vector);
 		for (int i = 0 ; i < this.vector.length; i++) {
-			retval.vector[i] = retval.vector[i].copyAndInit();
+			retval.vector[i] = retval.vector[i].copyAndInit(owner);
 		}
 		return retval;
 	}

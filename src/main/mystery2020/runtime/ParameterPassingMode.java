@@ -9,21 +9,21 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 	public ParameterPassingMode(String name, String code) {
 		super(name, code);
 	}
-	
+
 	// before call
 	public abstract Variable prepareParameter(Runtime runtime, Expr expr, MType type, Configuration config);
 	// after call
 	public abstract void postprocessParameter(Runtime runtime, Variable var, Expr expr);
-	
+
 	protected Variable
 	createValueParameter(Runtime rt, Expr expr) {
 		Value v = expr.eval(rt);
 		Variable var = new Variable(v.getType(), null);
-		var.setValue(v.getType().getDefaultValue(), null); // may be needed for array copying
+		var.setValue(v.getType().getDefaultValue(expr), null); // may be needed for array copying
 		var.setValue(v, rt.getConfiguration());
 		return var;
 	}
-	
+
 	protected MType
 	getType(Runtime rt, Expr expr) {
 		return MType.ANY;
@@ -36,14 +36,14 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 			var.checkAndSetValue(target, var.getValue(), rt.getConfiguration());
 		}
 	}
-	
+
 	public boolean
 	assignabilityDynamicallyCheckableAtCallTime() {
 		return this.typeDynamicallyCheckableAtCallTime();
 	}
 
 	/**
-	 * Otherwise the PrameterPassingMode has to do dynamic type checking by hand (if appropriate) 
+	 * Otherwise the PrameterPassingMode has to do dynamic type checking by hand (if appropriate)
 	 *
 	 * @return
 	 */
@@ -52,7 +52,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 		return true;
 	}
 
-	// ========== 
+	// ==========
 	public static ParameterPassingMode ByValue = new ParameterPassingMode("Pass by Value", "V") {
 		@Override
 		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
@@ -65,7 +65,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 		}
 	};
 
-	// ========== 
+	// ==========
 	public static ParameterPassingMode ByResult = new ParameterPassingMode("Pass by Result", "R") {
 
 		@Override
@@ -75,7 +75,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 				expr.eval(rt);
 				var = new Variable(type, "<temp>");
 			}
-			return new Variable.WriteOnlyProxy(var, rt.getConfiguration(), expr); 
+			return new Variable.WriteOnlyProxy(var, rt.getConfiguration(), expr);
 		}
 
 		@Override
@@ -90,8 +90,8 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 			return false;
 		}
 	};
-	
-	// ========== 
+
+	// ==========
 	public static ParameterPassingMode ByValueResult = new ParameterPassingMode("Pass by Value-Result", "C") {
 
 		@Override
@@ -113,8 +113,8 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 			((Variable.Proxy)var).writeToRemote();
 		}
 	};
-	
-	// ========== 
+
+	// ==========
 	public static ParameterPassingMode ByReference = new ParameterPassingMode("Pass by Reference", "P") {
 
 		@Override
@@ -131,8 +131,8 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 		postprocessParameter(Runtime rt, Variable var, Expr expr) {
 		}
 	};
-	
-	// ========== 
+
+	// ==========
 	public static ParameterPassingMode ByName = new ParameterPassingMode("Pass by Name", "N") {
 
 		@Override
@@ -151,12 +151,12 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 			return false;
 		}
 	};
-	
+
 	public static ParameterPassingMode ByNeed = new ParameterPassingMode("Pass by Need", "E") {
 
 		@Override
 		public Variable prepareParameter(Runtime rt, Expr expr, MType type, Configuration config) {
-			return new Variable.LazyCached(this.getType(rt, expr), "<outmode-arg>", expr, rt); 
+			return new Variable.LazyCached(this.getType(rt, expr), "<outmode-arg>", expr, rt);
 		}
 
 		@Override

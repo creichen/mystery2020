@@ -33,9 +33,9 @@ aspect Typing {
 	}
 	return MType.ARRAY(getSubrange().getMinMax(), getElementType().getMType(rt));
     }
-    ArrayType contributes (new MysteryLimitException(line(), "Array too large"))
-	when getSubrange().getMinMax().size() > Configuration.ARRAY_SIZE_LIMIT
-	to Program.generalStaticErrors();
+    // ArrayType contributes (new MysteryLimitException(line(), "Array too large"))
+    // 	when getSubrange().getMinMax().size() > Configuration.ARRAY_SIZE_LIMIT
+    // 	to Program.generalStaticErrors();
 
     eq NamedType.getMType(Runtime rt) {
 	if (rt.getDeclaration(this) == null) {
