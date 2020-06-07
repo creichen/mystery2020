@@ -12,7 +12,7 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 	public ScopingMode(String name, String code) {
 		super(name, code);
 	}
-	
+
 	public abstract Decl
 	getDeclaration(Runtime rt, ID id);
 
@@ -21,12 +21,12 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 
 	public abstract Variable
 	getVariable(Runtime rt, VarDecl vardecl);
-	
+
 	public abstract Value
 	callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args);
 
 	public static ScopingMode Static = new ScopingMode("Static Scoping", "S") {
-		
+
 		@Override
 		public Value
 		callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args) {
@@ -53,20 +53,17 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 	};
 
 	public static ScopingMode Dynamic = new ScopingMode("Dynamic Scoping", "D") {
-		
+
 		@Override
 		public Value
 		callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args) {
-			if (false) {
-				return rt.getConfiguration().closure_env_binding.get().callClosure(closure, rt, line_nr, args);
-			}
 			// prepare env for call
 			VariableStack call_env = rt.getStack();
 			ActivationRecord arecord = new ActivationRecord(args, closure.proc.getDecls());
 			closure.checkAndAdaptActuals(rt, line_nr, arecord);
 			call_env.push(arecord);
 			//System.err.println("------ REC CALL: pushing to make\n" + call_env);
-		
+
 			// call
 			Value result = closure.proc.getBody().run(rt);
 			// return to callee

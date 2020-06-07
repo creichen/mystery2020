@@ -54,7 +54,7 @@ aspect Run {
     public Value
     Block.run(Runtime rt) {
 	rt.runStep(this);
-	rt.getStack().push(new ActivationRecord(this.variableVector(rt).instantiate(), this.getDecls()));
+	rt.getStack().push(new ActivationRecord(this.variableVector(rt).accessInstance(rt, this), this.getDecls()));
 
 	/*
 	System.err.println("ENTERING BLOCK with vars:");

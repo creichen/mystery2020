@@ -18,22 +18,23 @@ import mystery2020.runtime.ScopingMode;
 import mystery2020.runtime.ShortCircuitEvaluation;
 import mystery2020.runtime.TypeCheck;
 import mystery2020.runtime.TypeNamesTYPE;
+import mystery2020.runtime.VariableStorageBinding;
 
 public class Configuration {
 	// ====================
 	// limits
 	private int step_limit = 10000;
 	private int call_limit = 1000;
-	
+
 	// ====================
 	// operators
-	
+
 	public enum Op {
 		ADD("+"),
 		EQ("=="),
 		GT(">"),
 		AND("AND");
-		
+
 		private String sourcename;
 		private Op(String sourcename) {
 			this.sourcename = sourcename;
@@ -43,7 +44,7 @@ public class Configuration {
 			return this.sourcename;
 		}
 	}
-	
+
 	private Map<Op, OpConfig> op_config = new HashMap<>();
 	{
 		this.op_config.put(Op.ADD, new OpConfig(3, OpConfig.Associativity.RIGHT));
@@ -51,14 +52,14 @@ public class Configuration {
 		this.op_config.put(Op.GT,  new OpConfig(2, OpConfig.Associativity.NONE));
 		this.op_config.put(Op.AND, new OpConfig(0, OpConfig.Associativity.RIGHT));
 	}
-	
+
 	public Map<Op, OpConfig>
 	getOpConfig() {
 		return this.op_config;
 	}
 
 	public static final String OP_SUBSYSTEM_CODE = "OP";
-	
+
 	// ====================
 	// Configuration for all other subsystems
 	// generic part
@@ -67,11 +68,11 @@ public class Configuration {
 	private static Map<ConfigSubsystem<?>, Integer> subsystems_index = new HashMap<>();
 	private static List<ConfigSubsystem<?>> subsystems_ordered = new ArrayList<>();
 	private ArrayList<ConfigSubsystem<?>.Config> configurations = new ArrayList<>();
-	
+
 	{
 		subsystems_by_name.put(OP_SUBSYSTEM_CODE, OP_SUBSYSTEM_INDEX);
 	}
-	
+
 	static int
 	getConfigSubsystemIndex(ConfigSubsystem<?> subsystem) {
 		if (Configuration.subsystems_index.containsKey(subsystem)) {
@@ -85,8 +86,8 @@ public class Configuration {
 		Configuration.subsystems_index.put(subsystem, new_index);
 		return new_index;
 	}
-	
-	void 
+
+	void
 	setSubsystem(int config_index, ConfigSubsystem<?>.Config conf) {
 		while (this.configurations.size() <= config_index) {
 			this.configurations.add(null);
@@ -102,7 +103,7 @@ public class Configuration {
 			ParameterEvaluationOrder.RightToLeft
 			);
 	public ConfigSubsystem<ParameterEvaluationOrder>.Config parameter_evaluation_order = SUBSYSTEM_parameter_evaluation_order.getConfig(this);
-	
+
 	private static ConfigSubsystem<ShortCircuitEvaluation> SUBSYSTEM_short_circuit_evaluation = new ConfigSubsystem<>(
 			"Short Circuit Evaluation",
 			"SCE",
@@ -110,7 +111,7 @@ public class Configuration {
 			ShortCircuitEvaluation.OFF
 			);
 	public ConfigSubsystem<ShortCircuitEvaluation>.Config short_circuit_evaluation = SUBSYSTEM_short_circuit_evaluation.getConfig(this);
-	
+
 	private static ConfigSubsystem<OperandEvaluationOrder> SUBSYSTEM_operand_evaluation_order = new ConfigSubsystem<>(
 			"Operand Evaluation Order",
 			"OEO",
@@ -126,7 +127,7 @@ public class Configuration {
 			TypeNamesTYPE.Nominal
 			);
 	public ConfigSubsystem<TypeNamesTYPE>.Config type_names_TYPE = SUBSYSTEM_type_names_TYPE.getConfig(this);
-	
+
 	private static ConfigSubsystem<TypeCheck> SUBSYSTEM_type_check = new ConfigSubsystem<>(
 			"Type Checking",
 			"TC",
@@ -143,7 +144,7 @@ public class Configuration {
 			ArrayAssignmentSemantics.Reference
 			);
 	public ConfigSubsystem<ArrayAssignmentSemantics>.Config array_assignment = SUBSYSTEM_array_assignment_semantics.getConfig(this);
-	
+
 	private static ConfigSubsystem<ParameterPassingMode> SUBSYSTEM_parameter_passing_mode = new ConfigSubsystem<>(
 			"Parameter Passing",
 			"PP",
@@ -155,6 +156,14 @@ public class Configuration {
 			ParameterPassingMode.ByNeed
 			);
 	public ConfigSubsystem<ParameterPassingMode>.Config parameter_passing = SUBSYSTEM_parameter_passing_mode.getConfig(this);
+
+	private static ConfigSubsystem<VariableStorageBinding> SUBSYSTEM_variable_storage_binding = new ConfigSubsystem<>(
+			"Locals Storage Binding",
+			"LSB",
+			VariableStorageBinding.StackDynamic,
+			VariableStorageBinding.Static
+			);
+	public ConfigSubsystem<VariableStorageBinding>.Config variable_storage = SUBSYSTEM_variable_storage_binding.getConfig(this);
 
 	private static ConfigSubsystem<ScopingMode> SUBSYSTEM_scoping_mode = new ConfigSubsystem<>(
 			"Scoping",
@@ -179,7 +188,7 @@ public class Configuration {
 			ArrayEquality.Reference
 			);
 	public ConfigSubsystem<ArrayEquality>.Config array_equality = SUBSYSTEM_array_equality.getConfig(this);
-	
+
 	private static ConfigSubsystem<ProcedureSubtyping> SUBSYSTEM_procedure_arg_subtyping = new ConfigSubsystem<>(
 			"Procedure Argument Subtyping",
 			"PSA",
@@ -199,7 +208,7 @@ public class Configuration {
 			ProcedureSubtyping.Bivariant
 			);
 	public ConfigSubsystem<ProcedureSubtyping>.Config procedure_return_subtyping = SUBSYSTEM_procedure_return_subtyping.getConfig(this);
-	
+
 	private static ConfigSubsystem<LiteralType> SUBSYSTEM_literal_type = new ConfigSubsystem<>(
 			"Literal Number Type",
 			"LT",
@@ -212,9 +221,9 @@ public class Configuration {
 	stronglyTyped() {
 		return this.type_check.get().dynamic_checks() || this.type_check.get().static_checks();
 	}
-	
+
 	// ==========
-	
+
 	/**
 	 * Constructs a default configuration
 	 */
@@ -243,7 +252,7 @@ public class Configuration {
 		ConfigSubsystem<?>.Config config = this.configurations.get(subsystem_index);
 		config.set(option_code);
 	}
-	
+
 	public void
 	setOptions(String config_string) {
 		if (config_string.length() == 0) {
@@ -265,7 +274,7 @@ public class Configuration {
 		config.setOptions(config_string);
 		return config;
 	}
-	
+
 	@Override
 	public String
 	toString() {
@@ -286,7 +295,7 @@ public class Configuration {
 			output.append(":");
 			output.append(subsystem_conf.get().getCode());
 		}
-		
+
 		return output.toString();
 	}
 
@@ -299,7 +308,7 @@ public class Configuration {
 	getCallLimit() {
 		return this.call_limit;
 	}
-	
+
 	public int
 	getStepLimit() {
 		return this.step_limit;
@@ -309,7 +318,7 @@ public class Configuration {
 	setCallLimit(int limit) {
 		this.call_limit = limit;
 	}
-	
+
 	public void
 	setStepLimit(int limit) {
 		this.step_limit = limit;

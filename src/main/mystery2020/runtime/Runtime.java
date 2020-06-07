@@ -20,12 +20,12 @@ import mystery2020.MysteryLimitException;
  *
  */
 public class Runtime {
-	
+
 	// This stack represents the STATIC LINK structure, not the dynamic links.
 	// In other words, it reflects the static nesting structure of the program,
 	// if you recurse, you'll simply keep updating the same-depth entries in it.
 	public VariableStack stack = VariableStack.createEmpty();
-	
+
 	public ArrayList<String> output = new ArrayList<>();
 	private int steps_taken = 0;
 	private int calls_taken = 0;
@@ -38,10 +38,10 @@ public class Runtime {
 		this.setCallLimit(config.getCallLimit());
 		this.setStepsLimit(config.getStepLimit());
 	}
-	
+
 	/**
 	 * Sets the maximum number of calls
-	 * 
+	 *
 	 * @param limit
 	 */
 	public void
@@ -51,7 +51,7 @@ public class Runtime {
 
 	/**
 	 * Sets the maximum number of stmts that will be executed
-	 * 
+	 *
 	 * @param limit
 	 */
 	public void
@@ -68,7 +68,7 @@ public class Runtime {
 	setStack(VariableStack new_stack) {
 		this.stack = new_stack;
 	}
-	
+
 	public Configuration
 	getConfiguration() {
 		return this.config;
@@ -127,7 +127,7 @@ public class Runtime {
 	prepareCallArgument(Expr expr, MType type) {
 		return this.config.parameter_passing.get().prepareParameter(this, expr, type, config);
 	}
-	
+
 	public void
 	postprocessCallArguments(VariableVector actuals_vector, AST.List<Expr> original_args) {
 		// currently always left-to-right
@@ -139,7 +139,7 @@ public class Runtime {
 	}
 
 	/**
-	 * Computes a variable vector that represents the call arguments irrespective of parameter passing mode. 
+	 * Computes a variable vector that represents the call arguments irrespective of parameter passing mode.
 	 *
 	 * @param args
 	 * @return

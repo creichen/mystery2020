@@ -6,17 +6,17 @@ import mystery2020.ParameterCountMismatch;
 public class Closure {
 	ProcDecl proc;
 	VariableStack env;
-	
+
 	public Closure(ProcDecl proc, VariableStack env) {
 		this.proc = proc;
 		this.env = env;
 	}
-	
+
 	/**
 	 * Get a new Closure with an updated environment
-	 * 
+	 *
 	 * Needed by shallow and ad-hoc binding.
-	 * 
+	 *
 	 * @param env
 	 * @return
 	 */
@@ -32,7 +32,7 @@ public class Closure {
 
 	/**
 	 * Checks arguments and types for parameters, sets their names
-	 * 
+	 *
 	 * @param line_nr
 	 * @param args
 	 */
@@ -53,9 +53,9 @@ public class Closure {
 		if (this.env == null) {
 			throw new RuntimeException("Must set environment before calling closure");
 		}
-		Value result =rt.getConfiguration().scoping.get().callClosure(this, rt, line_nr, args);
+		Value result = rt.getConfiguration().scoping.get().callClosure(this, rt, line_nr, args);
 		if (result == null) {
-			return Value.NOTHING; 
+			return Value.NOTHING;
 		}
 		return result;
 	}

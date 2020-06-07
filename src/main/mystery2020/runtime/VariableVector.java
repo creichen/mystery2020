@@ -2,20 +2,21 @@ package mystery2020.runtime;
 
 import mystery2020.Configuration;
 import mystery2020.MysteryArrayOOBException;
+import AST.ASTNode;
 
 /**
  * Represents a vector of variables (either abstract or concrete), as used in a formal/actual parameter list or activation record
- * 
+ *
  * @author creichen
  *
  */
 public class VariableVector {
 	private Variable[] vector;
 	int offset = 0;
-	boolean bounds_check = false; 
-	
+	boolean bounds_check = false;
+
 	/**
-	 * 
+	 *
 	 * @param v
 	 * @param offset The offset of v[0] from the perspective of get()
 	 */
@@ -24,22 +25,22 @@ public class VariableVector {
 		this.offset = offset;
 		this.bounds_check = true;
 	}
-	
+
 	public VariableVector(Variable[] v) {
 		this(v, 0);
 		this.bounds_check = false;
 	}
-	
+
 	public Variable
 	get(int i) {
 		return this.vector[i - this.offset];
 	}
-	
+
 	public int
 	getOffset() {
 		return this.offset;
 	}
-	
+
 	public Variable
 	getChecked(int line_nr, int i) {
 		if (i < this.offset || (i - this.offset) >= this.vector.length) {
@@ -47,8 +48,10 @@ public class VariableVector {
 		}
 		return this.get(i);
 	}
-		
-	
+
+	/**
+	 * Creates and initialises a (deep) copy of this variable vector
+	 */
 	public VariableVector
 	instantiate() {
 		VariableVector retval = new VariableVector(this.vector);
@@ -57,7 +60,15 @@ public class VariableVector {
 		}
 		return retval;
 	}
-	
+
+	/**
+	 * Accesses a suitable instance, depending on how local variable storage is configured
+	 */
+	public VariableVector
+		accessInstance(Runtime rt, ASTNode ast_node) {
+		return rt.getConfiguration().variable_storage.get().getVariableVectorInstance(this, ast_node);
+	}
+
 	@Override
 	public String
 	toString() {

@@ -8,7 +8,7 @@ import mystery2020.NotAClosureException;
 public class Value {
 	private MType type;
 	private Object value;
-	
+
 	public Value(MType type, Object obj) {
 		this.type = type;
 		this.value = obj;
@@ -35,24 +35,24 @@ public class Value {
 	getType() {
 		return this.type;
 	}
-	
+
 	public Object
 	getValue() {
 		return this.value;
 	}
-	
+
 	public Value
 	call(Runtime rt, int line, VariableVector args) {
 		if (this.value instanceof Closure) {
 			return ((Closure)this.value).call(rt, line, args);
-			
+
 		}
 		throw new NotAClosureException(line, "Cannot be called: " + this);
 	}
 
 	/**
 	 * Retrieves int without type checking
-	 * 
+	 *
 	 * @param line_nr Line number, for error reporting
 	 * @return int interpretation, or a DynamicTypeError on failure
 	 */
@@ -63,7 +63,7 @@ public class Value {
 		}
 		throw new DynamicTypeError(line_nr, "Non-int (" + this.type.toString() + ") to int");
 	}
-	
+
 	public VariableVector
 	getArray(int line_nr) {
 		if (this.value instanceof VariableVector) {
@@ -71,17 +71,17 @@ public class Value {
 		}
 		throw new DynamicTypeError(line_nr, "Non-array (" + this.type.toString() + ") to array");
 	}
-	
+
 	public static Value
 	True(Configuration cfg) {
 		return new Value(MType.UR_INTEGER, 1);
 	}
-	
+
 	public static Value
 	False(Configuration cfg) {
 		return new Value(MType.UR_INTEGER, 0);
 	}
-	
+
 	public boolean
 	equalTo(Object other, Configuration config) {
 		if (other instanceof Value) {
@@ -91,7 +91,7 @@ public class Value {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String
 	toString() {
