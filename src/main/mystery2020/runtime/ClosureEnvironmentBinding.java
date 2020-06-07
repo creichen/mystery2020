@@ -9,9 +9,9 @@ public abstract class ClosureEnvironmentBinding extends AbstractConfigOption<Clo
 	public ClosureEnvironmentBinding(String name, String code) {
 		super(name, code);
 	}
-	
+
 	public abstract Value callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args);
-	
+
 	public abstract Decl
 	getDeclaration(Runtime rt, ID id);
 
@@ -35,14 +35,14 @@ public abstract class ClosureEnvironmentBinding extends AbstractConfigOption<Clo
 		@Override
 		public Value callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args) {
 			VariableStack old_env = rt.getStack();
-		
+
 			// prepare env for call
 			VariableStack call_env = closure.env.copy();
 			ActivationRecord arecord = new ActivationRecord(args, closure.proc.getDecls());
 			closure.checkAndAdaptActuals(rt, line_nr, arecord);
 			call_env.push(arecord);
 			rt.setStack(call_env);
-		
+
 			// call
 			Value result = closure.proc.getBody().run(rt);
 			// return to callee
