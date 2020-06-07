@@ -14,11 +14,15 @@ public class MinMax {
 	public int getMin() {
 		return this.min;
 	}
-	
+
 	public int getMax() {
 		return this.max;
 	}
-	
+
+	public int size() {
+		return this.max - this.min + 1;
+	}
+
 	@Override
 	public String
 	toString() {

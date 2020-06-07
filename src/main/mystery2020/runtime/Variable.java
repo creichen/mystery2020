@@ -13,9 +13,9 @@ public class Variable {
 
 	/**
 	 * Constructs a new variable
-	 * 
+	 *
 	 * The value is initialised to null, which is not a valid value.  Use initDefault() to properly initialise.
-	 * 
+	 *
 	 * @param type Type of the variable, must be set
 	 * @param name Name of the variable, may be null
 	 */
@@ -42,22 +42,22 @@ public class Variable {
 	getName() {
 		return this.name;
 	}
-	
+
 	public boolean
 	hasName() {
 		return this.name != null;
 	}
-	
+
 	public MType
 	getType() {
 		return this.type;
 	}
-	
+
 	public Value
 	getValue() {
 		return this.value;
 	}
-	
+
 	public void
 	checkAndSetValue(ASTNode<?> node, Value v, Configuration config) {
 		this.type.ensureCanAssignFrom(node, v.getType());
@@ -67,7 +67,7 @@ public class Variable {
 
 	/**
 	 * No type checking here, type checking happens at assignments and calls
-	 * 
+	 *
 	 * @param v
 	 * @param config Configuration for special assignment semantics, or null for default semantics
 	 */
@@ -91,18 +91,18 @@ public class Variable {
 	internalAssignValue(Object raw_value, MType type, Configuration config) {
 		this.value = new Value(this.type, raw_value);
 	}
-	
+
 	@Override
 	public String
 	toString() {
-		return this.name + ":" + this.type + "=" + this.value; 
+		return this.name + ":" + this.type + "=" + this.value;
 	}
 
 	public void
 	setName(String new_name) {
 		this.name = new_name;
 	}
-	
+
 	public static class Proxy extends Variable {
 		private Variable remote;
 		protected Configuration config;
@@ -112,12 +112,12 @@ public class Variable {
 			this.remote = outer_variable;
 			this.config = config;
 		}
-		
+
 		public void
 		loadFromRemote() {
 			this.setValue(this.remote.getValue(), this.config);
 		}
-		
+
 		public Value
 		getAssignedValue() {
 			return super.getValue();
@@ -138,13 +138,13 @@ public class Variable {
 			super(remote, config);
 			this.owner = owner;
 		}
-		
+
 		@Override
 		public Value
 		getValue() {
 			throw new InvalidModeException(this.owner.line(), "Cannot read from write-only variable");
 		}
-		
+
 		@Override
 		public void
 		internalAssignValue(Object raw_value, MType type, Configuration config) {
@@ -154,7 +154,7 @@ public class Variable {
 			super.internalAssignValue(raw_value, type, config);
 		}
 	}
-	
+
 	public static class Dynamic extends Variable {
 		public Dynamic(MType type, String name) {
 			super(type, name);
@@ -178,7 +178,7 @@ public class Variable {
 			this.stack = rt.getStack().copy();
 			this.expr = expr;
 		}
-		
+
 		protected final Variable
 		var() {
 			final VariableStack old_stack = this.rt.getStack();
@@ -187,7 +187,7 @@ public class Variable {
 			this.rt.setStack(old_stack);
 			return v;
 		}
-		
+
 		@Override
 		public Value
 		getValue() {
@@ -205,7 +205,7 @@ public class Variable {
 			}
 			var.checkAndSetValue(this.expr, new Value(type, raw_value), this.rt.getConfiguration());
 		}
-		
+
 		@Override
 		public void
 		internalAssignValue(Object raw_value, MType type, Configuration config) {
@@ -237,7 +237,7 @@ public class Variable {
 			}
 			return this.var;
 		}
-		
+
 		@Override
 		public Value
 		getValue() {
@@ -251,7 +251,7 @@ public class Variable {
 			}
 			return this.val;
 		}
-		
+
 		@Override
 		public void
 		internalAssignValue(Object raw_value, MType type, Configuration config) {

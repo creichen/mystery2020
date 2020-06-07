@@ -1,6 +1,8 @@
+import mystery2020.Configuration;
+import mystery2020.InvalidSubrangeException;
 import mystery2020.MType;
 import mystery2020.MinMax;
-import mystery2020.InvalidSubrangeException;
+import mystery2020.MysteryLimitException;
 import mystery2020.RecursiveTypeException;
 import mystery2020.UnknownTypeException;
 import mystery2020.runtime.Runtime;
@@ -31,6 +33,10 @@ aspect Typing {
 	}
 	return MType.ARRAY(getSubrange().getMinMax(), getElementType().getMType(rt));
     }
+    ArrayType contributes (new MysteryLimitException(line(), "Array too large"))
+	when getSubrange().getMinMax().size() > Configuration.ARRAY_SIZE_LIMIT
+	to Program.generalStaticErrors();
+
     eq NamedType.getMType(Runtime rt) {
 	if (rt.getDeclaration(this) == null) {
 	    throw new UnknownTypeException(this.line(), "Unknown type: " + this.getName());

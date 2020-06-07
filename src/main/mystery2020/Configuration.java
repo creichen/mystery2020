@@ -25,6 +25,7 @@ public class Configuration {
 	// limits
 	private int step_limit = 10000;
 	private int call_limit = 1000;
+	public static final int ARRAY_SIZE_LIMIT = 65536;
 
 	// ====================
 	// operators

@@ -65,7 +65,7 @@ public class VariableVector {
 	 * Accesses a suitable instance, depending on how local variable storage is configured
 	 */
 	public VariableVector
-		accessInstance(Runtime rt, ASTNode ast_node) {
+	accessInstance(Runtime rt, ASTNode ast_node) {
 		return rt.getConfiguration().variable_storage.get().getVariableVectorInstance(this, ast_node);
 	}
 

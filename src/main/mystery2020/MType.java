@@ -17,7 +17,7 @@ public abstract class MType {
 	convertibleFromForeignType(MType other, Configuration config) {
 		return false;
 	}
-	
+
 	public final boolean
 	isSubtypeOf(MType other, Configuration config) {
 		return this == other
@@ -25,7 +25,7 @@ public abstract class MType {
 				|| this.equalTo(other, config)
 				|| this.isNontrivialSubtypeOf(other, config);
 	}
-	
+
 	public boolean
 	isNontrivialSubtypeOf(MType other, Configuration config) {
 		return false;
@@ -37,13 +37,13 @@ public abstract class MType {
 				|| other.convertibleFromForeignType(this, config)
 				;
 	}
-	
+
 	public final boolean
 	equalTo(MType other, Configuration config) {
 		MTypeComparison comp = new MTypeComparison(config);
 		return comp.isEq(this, other);
 	}
-	
+
 	public boolean
 	isStructurallyEqual(MType other, MTypeComparison comp) {
 		return other == this;
@@ -61,7 +61,7 @@ public abstract class MType {
 			throw new DynamicTypeError(node.line(), "Cannot assign " + source + " to " + this);
 		}
 	}
-	
+
 	public ArrayType
 	getArrayType(ASTNode<?> node) {
 		throw new DynamicTypeError(node.line(), "Not an array type: " + this);
@@ -71,9 +71,9 @@ public abstract class MType {
 	getProcedureType(ASTNode<?> node) {
 		throw new DynamicTypeError(node.line(), "Not a procedure type: " + this);
 	}
-	
+
 	/**
-	 * Type is machine inferred and thus canbe assigned to named types 
+	 * Type is machine inferred and thus canbe assigned to named types
 	 * @return
 	 */
 	public boolean
@@ -85,11 +85,11 @@ public abstract class MType {
 	namedType() {
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Value-based checks; these are only used after type checking has been passed
-	 * 
+	 *
 	 * @param node
 	 * @param value
 	 */
@@ -98,10 +98,10 @@ public abstract class MType {
 			throw new DynamicTypeError(node.line(), "Value " + value + " not allowed for type " + this);
 		}
 	}
-	
+
 	/**
 	 * Value-based checks; these are only used after type checking has been passed
-	 * 
+	 *
 	 * @param node
 	 * @param value
 	 */
@@ -128,7 +128,7 @@ public abstract class MType {
 	}
 
 	public abstract Value getDefaultValue();
-	
+
 	public static MType ANY = new MType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
@@ -172,12 +172,12 @@ public abstract class MType {
 		toString() {
 			return "INTEGER";
 		}
-		
+
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, 0);
 		}
-		
+
 		// Return the more specific type or null for failure
 		public IntegerType
 		plusMerge(IntegerType other, Configuration config) {
@@ -204,7 +204,7 @@ public abstract class MType {
 			return v1.equals(v2);
 		}
 	};
-	
+
 	public static MType UR_INTEGER = new IntegerType() {
 		@Override
 		public boolean
@@ -219,14 +219,14 @@ public abstract class MType {
 		}
 
 	};
-	
+
 	public static MType INTEGER = new IntegerType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType
 					|| (other instanceof NamedType && other.namedType().getBody().convertibleTo(this, config));
 		}
-		
+
 		@Override
 		public boolean
 		isStructurallyEqual(MType other, MTypeComparison comp) {
@@ -247,20 +247,20 @@ public abstract class MType {
 			return other == UR_INTEGER || other == INTEGER || other == ANY_INTEGER;
 		}
 	};
-	
+
 	public static MType UNIT = new MType() {
 		@Override
 		public String
 		toString() {
 			return "UNIT";
 		}
-		
+
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, Value.NOTHING);
 		}
 	};
-	
+
 	public static class SubrangeType extends IntegerType {
 		private int min, max;
 
@@ -268,17 +268,17 @@ public abstract class MType {
 			this.min = min;
 			this.max = max;
 		}
-		
+
 		public int
 		getMin() {
 			return this.min;
 		}
-		
+
 		public int
 		getMax() {
 			return this.max;
 		}
-		
+
 		@Override
 		public boolean isStructurallyEqual(MType other, MTypeComparison comp) {
 			if (other instanceof SubrangeType) {
@@ -293,7 +293,7 @@ public abstract class MType {
 		toString() {
 			return "[" + this.min + " TO " + this.max + "]";
 		}
-		
+
 		protected boolean allowsValue(Object value, Configuration config) {
 			int v = (Integer) value;
 			return v >= this.min && v <= this.max;
@@ -339,16 +339,16 @@ public abstract class MType {
 			return other instanceof IntegerType;
 		}
 	}
-	
+
 	public static class ArrayType extends MType {
 		private SubrangeType index;
 		private MType values;
-		
+
 		public ArrayType(SubrangeType index, MType values) {
 			this.index = index;
 			this.values = values;
 		}
-		
+
 		public MType
 		getValues() {
 			return this.values;
@@ -386,12 +386,12 @@ public abstract class MType {
 			// make config dependent
 			return true; // right now all arrays are ur-arrays
 		}
-		
+
 		int
 		length() {
 			return this.index.getMax() - this.index.getMin() + 1;
 		}
-		
+
 		public int
 		startOffset() {
 			return this.index.getMin();
@@ -406,7 +406,7 @@ public abstract class MType {
 			}
 			return new Value(this, new VariableVector(vars, this.startOffset()));
 		}
-		
+
 		@Override
 		public ArrayType
 		getArrayType(ASTNode<?> node) {
@@ -428,12 +428,12 @@ public abstract class MType {
 			this.args = args;
 			this.ret = ret;
 		}
-		
+
 		public MType
 		getRet() {
 			return this.ret;
 		}
-		
+
 		public MType[]
 		getArgs() {
 			return this.args;
@@ -445,7 +445,7 @@ public abstract class MType {
 				return false;
 			}
 			ProcedureType other = (ProcedureType) other_;
-			
+
 			if (other.getArgs().length != this.getArgs().length) {
 				return false;
 			}
@@ -506,7 +506,7 @@ public abstract class MType {
 			sb.append(this.ret.toString());
 			return sb.toString();
 		}
-		
+
 		@Override
 		public Value getDefaultValue() {
 			return new Value(this, new Closure(null, null) {
@@ -519,16 +519,16 @@ public abstract class MType {
 
 		}
 	}
-	
+
 	public static class NamedType extends MType {
 		private String name;
 		private MType type;
-		
+
 		public NamedType(String name, MType type) {
 			this.name = name;
 			this.type = type;
 		}
-		
+
 		public MType
 		getBody() {
 			return this.type;
@@ -548,36 +548,36 @@ public abstract class MType {
 		public Value getDefaultValue() {
 			return new Value(this, this.type.getDefaultValue().getValue());
 		}
-		
+
 		@Override
 		public String
 		toString() {
 			return this.name;
 		}
-		
+
 		@Override
 		public NamedType
 		namedType() {
 			return this;
 		}
 	}
-	
+
 	public static SubrangeType SUBRANGE(final MinMax minmax) {
 		return new SubrangeType(minmax.getMin(), minmax.getMax());
 	}
-	
+
 	public static MType PROCEDURE(MType[] arg, MType ret) {
 		return new ProcedureType(arg, ret);
 	}
-	
+
 	public static MType ARRAY(final MinMax index, MType values) {
 		return new ArrayType(SUBRANGE(index), values);
 	}
-	
+
 	public static NamedType NAMED(final String name, final MType body) {
 		return new NamedType(name, body);
 	}
-	
+
 	public static int
 	parseInt(int line, int column, String number) {
 		try {
