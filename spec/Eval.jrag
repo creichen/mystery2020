@@ -97,15 +97,8 @@ aspect Eval {
 		}
 	    }
 	}
-	// System.err.println("COMMENCE CALL:");
-	// try {
-	//     throw new RuntimeException();
-	// } catch (RuntimeException exn) {
-	//     exn.printStackTrace();
-	// }
 
 	Value result = v.call(rt, line(), actuals);
-	// System.err.println("COMPLETE CALL");
 	rt.postprocessCallArguments(actuals, this.getActuals());
 	return result;
     }
