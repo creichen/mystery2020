@@ -34,6 +34,8 @@ aspect Run {
 	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
 	}
 
+	Value v = this.getRHS().eval(rt);
+
 	this.getLHS().variable(rt).checkAndSetValue(this, this.getRHS().eval(rt), this.config());
 	// System.err.println("# after assignment " + this + ":");
 	// System.err.println(rt);

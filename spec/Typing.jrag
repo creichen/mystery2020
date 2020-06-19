@@ -24,7 +24,7 @@ aspect Typing {
 
     syn MType Type.getMType(Runtime rt);
 
-    eq UnknownType.getMType(Runtime rt) = MType.ANY;
+    eq UnknownType.getMType(Runtime rt) = MType.INTEGER;
     eq IntType.getMType(Runtime rt) = MType.INTEGER;
     eq SubrangeType.getMType(Runtime rt) = MType.SUBRANGE(getSubrange().getMinMax());
     eq ArrayType.getMType(Runtime rt) {
