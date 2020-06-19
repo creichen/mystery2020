@@ -18,6 +18,7 @@ import mystery2020.runtime.ScopingMode;
 import mystery2020.runtime.ShortCircuitEvaluation;
 import mystery2020.runtime.TypeCheck;
 import mystery2020.runtime.TypeNamesTYPE;
+import mystery2020.runtime.UnknownType;
 import mystery2020.runtime.VariableStorageBinding;
 
 public class Configuration {
@@ -217,6 +218,15 @@ public class Configuration {
 			LiteralType.Subrange
 			);
 	public ConfigSubsystem<LiteralType>.Config literal_type = SUBSYSTEM_literal_type.getConfig(this);
+
+	private static ConfigSubsystem<UnknownType> SUBSYSTEM_unknown_type = new ConfigSubsystem<>(
+			"Default Type (for ommitted type names)",
+			"DT",
+			UnknownType.Any,
+			UnknownType.Error,
+			UnknownType.Integer
+			);
+	public ConfigSubsystem<UnknownType>.Config unknown_type = SUBSYSTEM_unknown_type.getConfig(this);
 
 	public boolean
 	stronglyTyped() {
