@@ -36,7 +36,7 @@ aspect Run {
 
 	Value v = this.getRHS().eval(rt);
 
-	this.getLHS().variable(rt).checkAndSetValue(this, this.getRHS().eval(rt), this.config());
+	this.getLHS().variable(rt).checkAndSetValue(this, v, this.config());
 	// System.err.println("# after assignment " + this + ":");
 	// System.err.println(rt);
 	return null;
