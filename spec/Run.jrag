@@ -127,7 +127,8 @@ aspect Run {
     Output.run(Runtime rt) {
 	rt.runStep(this);
 	Value v = this.getExpr().eval(rt);
-	if (v.getType().convertibleTo(MType.INTEGER, config())) {
+	if (!v.getType().convertibleTo(MType.ANY, config())
+	    && v.getType().convertibleTo(MType.INTEGER, config())) {
 	    rt.addOutput(v.getValue().toString());
 	} else {
 	    rt.addOutput("?");
