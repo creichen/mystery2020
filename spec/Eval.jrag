@@ -198,7 +198,8 @@ aspect Eval {
 	if (dyncheck()) {
 	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getLHSNode(), lhs.getType());
 	    MType.ANY_INTEGER.ensureCanAssignFrom(args.getRHSNode(), rhs.getType());
-	    ty = ((MType.IntegerType)lhs.getType()).plusMerge(((MType.IntegerType)rhs.getType()), config());
+	    ty = lhs.getType().asInteger().plusMerge(rhs.getType().asInteger(), config());
+	    //ty = ((MType.IntegerType)lhs.getType()).plusMerge(((MType.IntegerType)rhs.getType()), config());
 	    if (ty == null) {
 		throw new DynamicTypeError(args.getLHSNode().line(), "Incompatible types for addition: " + lhs.getType() + " and " + rhs.getType());
 	    }

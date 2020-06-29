@@ -257,7 +257,7 @@ aspect StaticTyping {
 	if (e != null) {
 	    return e;
 	}
-	if (staticTypeBinOp(lhs.staticType(), rhs.staticType()) == null) {
+	if (staticTypeBinOp(lhs.staticType().asInteger(), rhs.staticType().asInteger()) == null) {
 	    return new StaticTypeError(lhs.line(), "Incompatible types for addition: " + lhs.staticType() + " and " + rhs.staticType());
 	}
 	return null;

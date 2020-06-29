@@ -86,6 +86,11 @@ public abstract class MType {
 		return null;
 	}
 
+	public IntegerType
+	asInteger() {
+		throw new RuntimeException("Must only be used after ANY_INTEGER.ensureCanAssignFrom!");
+	}
+
 
 	/**
 	 * Value-based checks; these are only used after type checking has been passed
@@ -129,7 +134,7 @@ public abstract class MType {
 
 	public abstract Value getDefaultValue(ASTNode node);
 
-	public static MType ANY = new MType() {
+	public static MType ANY = new IntegerType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return true;
@@ -202,6 +207,11 @@ public abstract class MType {
 		public boolean
 		valueEquals(Object v1, Object v2, Configuration config) {
 			return v1.equals(v2);
+		}
+
+		public IntegerType
+		asInteger() {
+			return this;
 		}
 	};
 
@@ -550,6 +560,11 @@ public abstract class MType {
 		@Override
 		public Value getDefaultValue(ASTNode node) {
 			return new Value(this, this.type.getDefaultValue(node).getValue());
+		}
+
+		public IntegerType
+		asInteger() {
+			return this.type.asInteger();
 		}
 
 		@Override
