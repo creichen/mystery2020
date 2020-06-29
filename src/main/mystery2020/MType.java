@@ -81,6 +81,14 @@ public abstract class MType {
 		return this.ur_type;
 	}
 
+	public MType
+	getBodyType() {
+		if (this.namedType() != null) {
+			return this.namedType().getBody();
+		}
+		return this;
+	}
+
 	public NamedType
 	namedType() {
 		return null;
@@ -542,9 +550,18 @@ public abstract class MType {
 			this.type = type;
 		}
 
+		private MType
+		getBodySingle() {
+			return this.type;
+		}
+
 		public MType
 		getBody() {
-			return this.type;
+			MType t = this.type;
+			while (t.namedType() != null) {
+				t = t.namedType().getBody();
+			}
+			return t;
 		}
 
 		public void
