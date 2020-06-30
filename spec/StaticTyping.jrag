@@ -87,10 +87,13 @@ aspect StaticTyping {
 
     public MType
     AddOp.staticTypeBinOp(MType lhs, MType rhs) {
-	if (lhs instanceof MType.IntegerType && rhs instanceof MType.IntegerType) {
-	    return ((MType.IntegerType)lhs).plusMerge((MType.IntegerType)rhs, this.config());
+	try {
+	    MType.ANY_INTEGER.ensureCanAssignFrom(this, lhs);
+	    MType.ANY_INTEGER.ensureCanAssignFrom(this, rhs);
+	} catch (DynamicTypeError __) {
+	    return null;
 	}
-	return null;
+	return lhs.asInteger().plusMerge(rhs.asInteger(), this.config());
     }
 
     public MType
