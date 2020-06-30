@@ -30,15 +30,13 @@ aspect Run {
     public Value
     Assignment.run(Runtime rt) {
 	rt.runStep(this);
-	if (!this.getLHS().isVariable()) {
+	if (!this.getLHS().isVariable() || this.getLHS().variable(rt) == null) {
 	    throw new InvalidVariableKindException(line(), "Trying to assign to non-variable");
 	}
 
 	Value v = this.getRHS().eval(rt);
 
 	this.getLHS().variable(rt).checkAndSetValue(this, v, this.config());
-	// System.err.println("# after assignment " + this + ":");
-	// System.err.println(rt);
 	return null;
     }
 

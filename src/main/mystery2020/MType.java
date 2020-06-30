@@ -169,12 +169,17 @@ public abstract class MType {
 		@Override
 		public String
 		toString() {
-			return "Error";
+			return "ERROR";
 		}
 
 		@Override
 		public Value getDefaultValue(ASTNode node) {
 			return Value.NOTHING;
+		}
+
+		@Override
+		public IntegerType asInteger() {
+			return ANY_INTEGER;
 		}
 	};
 
@@ -253,7 +258,7 @@ public abstract class MType {
 	};
 
 	// A type that is compatible with any integer type
-	public static MType ANY_INTEGER = new IntegerType() {
+	public static IntegerType ANY_INTEGER = new IntegerType() {
 		@Override
 		public boolean convertibleFromForeignType(MType other, Configuration config) {
 			return other instanceof IntegerType;

@@ -257,8 +257,12 @@ aspect StaticTyping {
 	if (e != null) {
 	    return e;
 	}
-	if (staticTypeBinOp(lhs.staticType().asInteger(), rhs.staticType().asInteger()) == null) {
-	    return new StaticTypeError(lhs.line(), "Incompatible types for addition: " + lhs.staticType() + " and " + rhs.staticType());
+	MType lhs_ty = lhs.staticType();
+	MType rhs_ty = rhs.staticType();
+	MType.ANY_INTEGER.ensureCanAssignFrom(this, lhs_ty);
+	MType.ANY_INTEGER.ensureCanAssignFrom(this, rhs_ty);
+	if (staticTypeBinOp(lhs_ty.asInteger(), rhs_ty.asInteger()) == null) {
+	    return new StaticTypeError(lhs.line(), "Incompatible types for addition: " + lhs_ty + " and " + rhs_ty);
 	}
 	return null;
     }
