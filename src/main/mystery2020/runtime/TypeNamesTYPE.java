@@ -12,7 +12,7 @@ public abstract class TypeNamesTYPE extends AbstractConfigOption<TypeNamesTYPE> 
 	public abstract MType normaliseType(MType type);
 	// What kind of MType should a  `TYPE name = type' resolve to?
 	//public abstract MType nameType(String name, MType type);
-	
+
 	public static TypeNamesTYPE Structural = new TypeNamesTYPE("Structural", "S") {
 
 		@Override
@@ -27,7 +27,7 @@ public abstract class TypeNamesTYPE extends AbstractConfigOption<TypeNamesTYPE> 
 //			return type;
 //		}
 	};
-	
+
 	public static TypeNamesTYPE Nominal = new TypeNamesTYPE("Nominal", "N") {
 
 		@Override
