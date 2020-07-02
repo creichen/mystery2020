@@ -13,6 +13,9 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 		super(name, code);
 	}
 
+	public abstract boolean
+	checkStaticNameErrors();
+
 	public abstract Decl
 	getDeclaration(Runtime rt, ID id);
 
@@ -26,6 +29,12 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 	callClosure(Closure closure, Runtime rt, int line_nr, VariableVector args);
 
 	public static ScopingMode Static = new ScopingMode("Static Scoping", "S") {
+
+		@Override
+		public boolean
+		checkStaticNameErrors() {
+			return true;
+		}
 
 		@Override
 		public Value
@@ -53,6 +62,12 @@ public abstract class ScopingMode extends AbstractConfigOption<ScopingMode> {
 	};
 
 	public static ScopingMode Dynamic = new ScopingMode("Dynamic Scoping", "D") {
+
+		@Override
+		public boolean
+		checkStaticNameErrors() {
+			return false;
+		}
 
 		@Override
 		public Value

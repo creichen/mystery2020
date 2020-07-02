@@ -9,7 +9,8 @@ aspect StaticErrors {
 
     public boolean
     Program.staticErrors() {
-	if (!nameErrors().isEmpty()) {
+	// config == null happens during some tests
+	if ((config == null || config.scoping.get().checkStaticNameErrors()) && !nameErrors().isEmpty()) {
 	    throw nameErrors().get(0);
 	}
 	if (!generalStaticErrors().isEmpty()) {
