@@ -76,7 +76,8 @@ public class Variable {
 		Object raw_value = v.getValue();
 		if (config != null) {
 			if (this.type instanceof MType.ArrayType
-					&& this.value.getValue() instanceof VariableVector
+					&& this.value != null
+			                && this.value.getValue() instanceof VariableVector
 					&& v.getValue() instanceof VariableVector) {
 				VariableVector lhs = (VariableVector) this.value.getValue();
 				VariableVector rhs = (VariableVector) v.getValue();
