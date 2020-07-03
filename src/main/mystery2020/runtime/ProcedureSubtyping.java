@@ -9,7 +9,7 @@ public abstract class ProcedureSubtyping extends AbstractConfigOption<ProcedureS
 	public ProcedureSubtyping(String name, String code) {
 		super(name, code);
 	}
-	
+
 	public abstract boolean
 	isSubtypeOf(MType tleft, MType tright, Configuration config);
 
@@ -19,7 +19,7 @@ public abstract class ProcedureSubtyping extends AbstractConfigOption<ProcedureS
 			return tleft.equalTo(tright, config);
 		}
 	};
-	
+
 	public static ProcedureSubtyping Covariant = new ProcedureSubtyping("Covariant", "+") {
 		@Override
 		public boolean isSubtypeOf(MType tleft, MType tright, Configuration config) {
@@ -33,8 +33,8 @@ public abstract class ProcedureSubtyping extends AbstractConfigOption<ProcedureS
 			return tright.isSubtypeOf(tleft, config);
 		}
 	};
-	
-	public static ProcedureSubtyping Bivariant = new ProcedureSubtyping("Contravariant", "_") {
+
+	public static ProcedureSubtyping Bivariant = new ProcedureSubtyping("Bivariant", "_") {
 		@Override
 		public boolean isSubtypeOf(MType tleft, MType tright, Configuration config) {
 			return true;
