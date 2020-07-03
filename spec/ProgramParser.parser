@@ -144,7 +144,7 @@ Expr expr =
     ;
 
 Expr operand =
-    IDENTIFIER						{: return new ID(IDENTIFIER); :}
+      IDENTIFIER					{: return new ID(IDENTIFIER); :}
     | INT_LITERAL					{: return new Number(INT_LITERAL); :}
     | operand.target OBRACKET expr.index CBRACKET	{: return new Subscription(target, index); :}
     | operand.callee OPAREN actuals CPAREN		{: return new Call(callee, actuals); :}

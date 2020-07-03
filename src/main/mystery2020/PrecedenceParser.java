@@ -20,11 +20,11 @@ public class PrecedenceParser {
 
 	Map<Op, OpConfig> config;
 	List<Stratum> strata = new ArrayList<>();
-	
+
 	public PrecedenceParser(Map<Op, OpConfig> config) {
 		this.config = config;
 		List<Integer> stratum_precedences = new ArrayList<>();
-		
+
 		Map<Integer, Set<Op>> operator_order = new HashMap<>();
 		for (Op op : Op.class.getEnumConstants()) {
 			int precedence = config.get(op).getPrecedence();
@@ -43,7 +43,7 @@ public class PrecedenceParser {
 			this.strata.add(this.makeStratum(operators));
 		}
 	}
-	
+
 	private Stratum
 	makeStratum(Set<Op> operators) {
 		EnumSet<Op> left_associative = EnumSet.noneOf(Op.class);
@@ -58,7 +58,7 @@ public class PrecedenceParser {
 		}
 		return new Stratum(left_associative, non_associative, right_associative);
 	}
-	
+
 	public static AST.Operator
 	makeOperator(Op op) {
 		switch (op) {
@@ -69,20 +69,20 @@ public class PrecedenceParser {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Starts out as list of exprs and binops, turns into tree
-	 * 
+	 *
 	 * @author creichen
 	 */
 	private class
 	PartTreeList {
 		private List<Expr> part_trees = new ArrayList<>();
 		private List<Op> operators = new ArrayList<>();
-		
+
 		public
 		PartTreeList(Expr bops) {
-			
+
 			Expr rhs = bops;
 			while (rhs instanceof BinOpSequence) {
 				BinOpSequence bop = (BinOpSequence) rhs;
@@ -92,7 +92,20 @@ public class PrecedenceParser {
 			}
 			this.part_trees.add(rhs);
 		}
-		
+
+		/**
+		 * Fix up any recursive BinOpSequences
+		 */
+		public void
+		parsePartTrees() {
+			for (int i = 0; i < this.part_trees.size(); i++) {
+				Expr expr = part_trees.get(i);
+				if (expr instanceof BinOpSequence) {
+					part_trees.set(i, PrecedenceParser.this.parse(expr));
+				}
+			}
+		}
+
 		public Op
 		getOperatorAfter(int offset) {
 			if (offset < 0 || offset >= this.operators.size()) {
@@ -100,12 +113,12 @@ public class PrecedenceParser {
 			}
 			return this.operators.get(offset);
 		}
-		
+
 		public Expr
 		getExpr(int offset) {
 			return this.part_trees.get(offset);
 		}
-		
+
 		/**
 		 * Merge two nodes
 		 * @param pos The left node to merge
@@ -123,7 +136,7 @@ public class PrecedenceParser {
 			this.operators.remove(pos);
 			this.part_trees.set(pos, replacement);
 		}
-		
+
 		public AST.Operator
 		makeOperatorAfter(int pos) {
 			AST.Operator op = PrecedenceParser.makeOperator(this.getOperatorAfter(pos));
@@ -136,7 +149,7 @@ public class PrecedenceParser {
 		int size() {
 			return this.operators.size();
 		}
-		
+
 		@Override
 		public String
 		toString() {
@@ -152,41 +165,43 @@ public class PrecedenceParser {
 			return sb.toString();
 		}
 	}
-	
+
 	public Expr
 	parse(Expr bos) {
-		//System.err.println(">>>>>>>>>> pp(" + bos.toString() + ") =>\n" + this.strata.toString());
+		// System.err.println(">>>>>>>>>> pp(" + bos.toString() + ") =>\n" + this.strata.toString());
 		PartTreeList ptl = new PartTreeList(bos);
+		ptl.parsePartTrees(); // fix up immediate subexpressions recursively
 		for (Stratum s : this.strata) {
 			s.reduce(ptl);
 		}
 		if (ptl.size() != 0) {
 			throw new RuntimeException("Precedence parsing failed with " + ptl);
 		}
+		// System.err.println(" ==>\n" + ptl.getExpr(0));
 		return ptl.getExpr(0);
 	}
-	
+
 	// precedence parsing stratum (operators with same precedence)
 	private static class Stratum {
 		private Pass left_to_right;
 		private Pass right_to_left;
 		private Pass invariant;
-		
+
 		public Stratum(
 				Set<Op> left_associative,
 				Set<Op> non_associative,
 				Set<Op> right_associative) {
-			
+
 			Set<Op> left_and_nonassociative = new HashSet<Op>(left_associative);
 			left_and_nonassociative.addAll(non_associative);
 			Set<Op> right_and_nonassociative = new HashSet<Op>(right_associative);
 			right_and_nonassociative.addAll(non_associative);
-			
+
 			this.left_to_right = new Pass(left_associative, right_and_nonassociative);
 			this.right_to_left = new Pass(right_associative, left_and_nonassociative);
 			this.invariant = new Pass(non_associative, non_associative);
 		}
-		
+
 		public void
 		reduce(PartTreeList ptl) {
 			int size = ptl.size();
@@ -194,14 +209,14 @@ public class PrecedenceParser {
 			this.right_to_left.reduce(ptl, size - 1, size, -1, -1);
 			this.invariant.reduce(ptl, 0, size, +1, 0);
 		}
-		
+
 		@Override
 		public String
 		toString() {
 			return "[l->r: " + this.left_to_right + "; l<-r: " + this.right_to_left + "; inv: " + this.invariant + "]";
 		}
 	}
-	
+
 	// a pass (left-to-right or right-to-left) within a stratum
 	private static class Pass {
 		private Set<Op> operators;
@@ -217,7 +232,7 @@ public class PrecedenceParser {
 			this.operators = operators;
 			this.conflict = non_associative;
 		}
-		
+
 		public void
 		reduce(PartTreeList ptl, int start, int size, int progress_if_not_reduced, int progress_if_reduced) {
 			if (this.operators.isEmpty()) {
@@ -225,7 +240,7 @@ public class PrecedenceParser {
 			}
 			int pos = start;
 			while (0 < size--) {
-				
+
 				//System.err.println("]]] At " + pos);
 				if (this.operators.contains(ptl.getOperatorAfter(pos))) {
 					Op potential_conflict = ptl.getOperatorAfter(pos + progress_if_not_reduced);
@@ -243,11 +258,11 @@ public class PrecedenceParser {
 				}
 			}
 		}
-		
+
 		@Override
 		public String
 		toString() {
-			return this.operators + " conflicts: " + this.conflict; 
+			return this.operators + " conflicts: " + this.conflict;
 		}
 	}
 }
