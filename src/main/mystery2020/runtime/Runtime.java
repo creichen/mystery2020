@@ -135,6 +135,7 @@ public class Runtime {
 		for (Expr expr : original_args) {
 			Variable var = actuals_vector.get(offset);
 			this.config.parameter_passing.get().postprocessParameter(this, var, expr);
+			offset += 1;
 		}
 	}
 

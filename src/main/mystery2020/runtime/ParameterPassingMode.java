@@ -110,6 +110,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 		@Override
 		public void
 		postprocessParameter(Runtime rt, Variable var, Expr expr) {
+			System.err.println("Writing back " + var);
 			((Variable.Proxy)var).writeToRemote();
 		}
 	};

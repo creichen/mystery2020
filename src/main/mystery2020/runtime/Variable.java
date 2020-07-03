@@ -130,6 +130,13 @@ public class Variable {
 				this.remote.setValue(this.getAssignedValue(), this.config);
 			}
 		}
+
+		@Override
+		public String
+		toString() {
+			return "PROXY[" + remote + "]" + this.getName() + ":" + this.getType() + "=" + this.value;
+		}
+
 	}
 
 	public static class WriteOnlyProxy extends Proxy{
