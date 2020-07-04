@@ -57,7 +57,6 @@ aspect Variable {
 	}
 
 	int index = index_v.getInt(line());
-	System.err.println("Subscription to: " + System.identityHashCode(target_v.getArray(line())));
 	return target_v.getArray(line()).getChecked(line(), index);
     }
 }
