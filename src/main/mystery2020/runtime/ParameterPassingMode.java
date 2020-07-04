@@ -75,7 +75,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 				expr.eval(rt);
 				var = new Variable(type, "<temp>");
 			}
-			return new Variable.WriteOnlyProxy(var, rt.getConfiguration(), expr);
+			return new Variable.WriteOnlyProxy(expr, var, rt.getConfiguration(), expr);
 		}
 
 		@Override
@@ -102,7 +102,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 				var = new Variable(val.getType(), "<temp>");
 				var.checkAndSetValue(expr, val, rt.getConfiguration());
 			}
-			Variable.Proxy proxy_var = new Variable.Proxy(var, rt.getConfiguration());
+			Variable.Proxy proxy_var = new Variable.Proxy(expr, var, rt.getConfiguration());
 			proxy_var.loadFromRemote();
 			return proxy_var;
 		}
@@ -152,6 +152,7 @@ public abstract class ParameterPassingMode extends AbstractConfigOption<Paramete
 		}
 	};
 
+	// ==========
 	public static ParameterPassingMode ByNeed = new ParameterPassingMode("Pass by Need", "E") {
 
 		@Override

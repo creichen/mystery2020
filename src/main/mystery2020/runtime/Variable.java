@@ -82,6 +82,7 @@ public class Variable {
 				VariableVector lhs = (VariableVector) this.value.getValue();
 				VariableVector rhs = (VariableVector) v.getValue();
 				raw_value = config.array_assignment.get().assign(lhs, rhs, config);
+				System.err.println("Raw value: " + System.identityHashCode(v.getValue())  + " -> " + System.identityHashCode(raw_value));
 			}
 		}
 		this.internalAssignValue(raw_value, v.getType(), config);
@@ -108,8 +109,9 @@ public class Variable {
 		private Variable remote;
 		protected Configuration config;
 
-		public Proxy(Variable outer_variable, Configuration config) {
+		public Proxy(ASTNode astnode, Variable outer_variable, Configuration config) {
 			super(outer_variable.getType(), outer_variable.getName() + ".proxy");
+			this.initDefault(astnode);
 			this.remote = outer_variable;
 			this.config = config;
 		}
@@ -134,7 +136,8 @@ public class Variable {
 		@Override
 		public String
 		toString() {
-			return "PROXY[" + remote + "]" + this.getName() + ":" + this.getType() + "=" + this.value;
+			return "PROXY[" + remote + "]" + this.getName() + ":" + this.getType() + "="
+					+ this.value;
 		}
 
 	}
@@ -142,8 +145,8 @@ public class Variable {
 	public static class WriteOnlyProxy extends Proxy{
 		private ASTNode<?> owner;
 
-		public WriteOnlyProxy(Variable remote, Configuration config, ASTNode<?> owner) {
-			super(remote, config);
+		public WriteOnlyProxy(ASTNode node, Variable remote, Configuration config, ASTNode<?> owner) {
+			super(node, remote, config);
 			this.owner = owner;
 		}
 
