@@ -422,10 +422,10 @@ public abstract class MType {
 
 		@Override
 		public Value getDefaultValue(ASTNode node) {
-			Variable[] vars = new Variable[this.length()];
 			if (this.length() > Configuration.ARRAY_SIZE_LIMIT) {
 				throw new MysteryLimitException(node.line(), "Array too large");
 			}
+			Variable[] vars = new Variable[this.length()];
 			for (int i = 0; i < vars.length; i++) {
 				vars[i] = new Variable(this.values, "<in-array>");
 				vars[i].setValue(this.values.getDefaultValue(node), null);
