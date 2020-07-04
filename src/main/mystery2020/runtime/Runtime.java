@@ -125,9 +125,7 @@ public class Runtime {
 
 	private Variable
 	prepareCallArgument(Expr expr, MType type) {
-		System.err.println("Preparing call argument: " + expr);
 		Variable v = this.config.parameter_passing.get().prepareParameter(this, expr, type, config);
-		System.err.println("  => " + v);
 		return v;
 	}
 

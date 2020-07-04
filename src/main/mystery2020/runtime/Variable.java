@@ -82,7 +82,6 @@ public class Variable {
 				VariableVector lhs = (VariableVector) this.value.getValue();
 				VariableVector rhs = (VariableVector) v.getValue();
 				raw_value = config.array_assignment.get().assign(lhs, rhs, config);
-				System.err.println("Raw value: " + System.identityHashCode(v.getValue())  + " -> " + System.identityHashCode(raw_value));
 			}
 		}
 		this.internalAssignValue(raw_value, v.getType(), config);
