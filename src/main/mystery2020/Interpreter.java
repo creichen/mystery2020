@@ -82,6 +82,18 @@ public class Interpreter {
 		Interpreter.action.accept(leftover_args.toArray(new String[leftover_args.size()]));
     }
 
+	/**
+	 * Parses input file or stdin (as appropriate)
+	 */
+	protected static Program
+	parseInput(String filename) throws IOException {
+		if (filename.equals(READ_FROM_STDIN)) {
+			return parse(new InputStreamReader(System.in));
+		} else {
+			return parseFile(filename);
+		}
+	}
+
 	private static void
 	run(String[] args) {
 		String filename = getFilename(args);
@@ -89,12 +101,7 @@ public class Interpreter {
 
 		try {
 			// Construct the AST
-			Program m;
-			if (filename.equals(READ_FROM_STDIN)) {
-				m = parse(new InputStreamReader(System.in));
-			} else {
-				m = parseFile(filename);
-			}
+			Program m = parseInput(filename);
 			m.setConfiguration(Interpreter.configuration);
 			m.run(rt);
 		} catch (IOException exn) {
@@ -126,7 +133,7 @@ public class Interpreter {
 
         try {
         	// Construct the AST
-        	Program m = parseFile(filename);
+        	Program m = parseInput(filename);
         	m.setConfiguration(Interpreter.configuration);
 		if (normalise) {
 			final Map<String, Integer> idmap = new HashMap<>();

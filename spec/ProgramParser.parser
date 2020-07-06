@@ -148,7 +148,7 @@ Expr operand =
     | INT_LITERAL					{: return new Number(INT_LITERAL); :}
     | operand.target OBRACKET expr.index CBRACKET	{: return new Subscription(target, index); :}
     | operand.callee OPAREN actuals CPAREN		{: return new Call(callee, actuals); :}
-    | OPAREN expr CPAREN				{: return expr; :}
+    | OPAREN expr CPAREN				{: return new Parentheses(expr); :}
     ;
 
 Operator operator =

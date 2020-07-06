@@ -181,6 +181,11 @@ aspect Eval {
 
 
     public Value
+    Parentheses.eval(Runtime rt) {
+	return this.getExpr().eval(rt);
+    }
+
+    public Value
     BinOp.eval(Runtime rt) {
 	Value result = this.getOperator().bin_eval(new BinArguments(this,
 								    this.getLHS(),

@@ -33,6 +33,11 @@ aspect StaticTyping {
     Expr implements StaticType;
 
     public MType
+    Parentheses.staticType() {
+	return this.getExpr().staticType();
+    }
+
+    public MType
     BinOpSequence.staticType() {
 	throw new RuntimeException();
     }
@@ -197,6 +202,11 @@ aspect StaticTyping {
     public MysteryException
     Number.checkStaticTypeError() {
 	return null; // can't go wrong
+    }
+
+    public MysteryException
+    Parentheses.checkStaticTypeError() {
+	return null; // can't go wrong by itself
     }
 
     public MysteryException

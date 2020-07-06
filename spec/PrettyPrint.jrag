@@ -258,6 +258,12 @@ aspect PrettyPrint {
 	s.add(")");
     }
 
+    public void Parentheses.stringify(Stringifier s) {
+	s.add(" ( ");
+	this.getExpr().stringify(s);
+	s.add(" ) ");
+    }
+
     public void Number.stringify(Stringifier s) {
 	s.add(this.getNumber());
     }

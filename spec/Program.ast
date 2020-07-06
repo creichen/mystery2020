@@ -31,6 +31,7 @@ BinOp		: Expr ::= LHS:Expr Operator RHS:Expr ;
 Number		: Expr ::= <Number> ;
 Call		: Expr ::= Callee:Expr Actual:Expr* ;
 ID		: Expr ::= <Name> ;
+Parentheses	: Expr ::= Expr ;
 Subscription	: Expr ::= Target:Expr Index:Expr ;
 UnitValue	: Expr; // used for "RETURN;"
 
