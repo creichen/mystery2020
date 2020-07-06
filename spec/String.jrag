@@ -38,7 +38,7 @@ aspect String {
 
     public String
     ID.toString() {
-	return this.getName();
+	return mystery2020.Configuration.stringifyID(this.getName());
     }
 
     public String

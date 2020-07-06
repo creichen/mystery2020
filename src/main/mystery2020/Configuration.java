@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import mystery2020.runtime.ArrayAssignmentSemantics;
 import mystery2020.runtime.ArrayEquality;
@@ -27,6 +28,23 @@ public class Configuration {
 	private int step_limit = 10000;
 	private int call_limit = 500;
 	public static final int ARRAY_SIZE_LIMIT = 65536;
+
+
+	// ====================
+	private static Function<String, String> id_stringifier = null;
+
+	public static void
+	setIDStringifier(Function<String, String> s) {
+		Configuration.id_stringifier = s;
+	}
+
+	public static String
+	stringifyID(String id) {
+		if (id_stringifier == null) {
+			return id;
+		}
+		return id_stringifier.apply(id);
+	}
 
 	// ====================
 	// operators

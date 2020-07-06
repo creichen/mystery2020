@@ -5,6 +5,8 @@ import AST.*;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class Interpreter {
@@ -16,12 +18,13 @@ public class Interpreter {
 	static Configuration configuration = new Configuration();
 
 	private static Consumer<String[]> action = Interpreter::run;
-	
+
 	private static boolean long_exceptions = false;
 
 	private CommandLineOption[] command_line_options = new CommandLineOption[] {
 			new CommandLineOption('v', "Print version number", false, s -> { Interpreter.action = Interpreter::print_version; }),
 			new CommandLineOption('P', "Print input program after parsing, rather than running it", false, s -> { Interpreter.action = Interpreter::print_after_parse; }),
+			new CommandLineOption('N', "Print normalised input program after parsing, rather than running it", false, s -> { Interpreter.action = Interpreter::print_normalised_after_parse; }),
 			new CommandLineOption('l', "List configuration options (human-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options; }),
 			new CommandLineOption('L', "List configuration options (excl. operators) (machine-readable)", false, s -> { Interpreter.action = Interpreter::print_config_options_machine; }),
 			new CommandLineOption('h', "Print this help", false,      s -> { Interpreter.action = Interpreter::print_help; }),
@@ -109,12 +112,31 @@ public class Interpreter {
 
 	private static void
 	print_after_parse(String[] args) {
+		print_after_parse_any(args, false);
+	}
+
+	private static void
+	print_normalised_after_parse(String[] args) {
+		print_after_parse_any(args, true);
+	}
+
+	private static void
+	print_after_parse_any(String[] args, boolean normalise) {
         String filename = getFilename(args);
 
         try {
         	// Construct the AST
         	Program m = parseFile(filename);
         	m.setConfiguration(Interpreter.configuration);
+		if (normalise) {
+			final Map<String, Integer> idmap = new HashMap<>();
+			Configuration.setIDStringifier(n -> {
+					if (!idmap.containsKey(n)) {
+						idmap.put(n, idmap.size());
+					}
+					return "v" + idmap.get(n);
+				});
+		}
         	System.out.println(m.toString());
         } catch (IOException exn) {
         	throw new RuntimeException(exn);

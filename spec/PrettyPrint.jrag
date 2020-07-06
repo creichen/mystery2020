@@ -1,3 +1,5 @@
+import mystery2020.Configuration;
+
 aspect PrettyPrint {
     class Stringifier {
 	StringBuffer sb = new StringBuffer();
@@ -74,14 +76,14 @@ aspect PrettyPrint {
 
     public void VarDecl.stringify(Stringifier s) {
 	s.add("VAR ");
-	s.add(this.getName());
+	s.add(Configuration.stringifyID(this.getName()));
 	s.add(" : ");
 	this.getType().stringify(s);
     }
 
     public void TypeDecl.stringify(Stringifier s) {
 	s.add("TYPE ");
-	s.add(this.getName());
+	s.add(Configuration.stringifyID(this.getName()));
 	s.add(" = ");
 	this.getType().stringify(s);
     }
@@ -90,7 +92,7 @@ aspect PrettyPrint {
 	s.add("PROCEDURE");
 	//s.add("{" + this.staticNestingDepth() + "}");
 	s.add(" ");
-	s.add(this.getName());
+	s.add(Configuration.stringifyID(this.getName()));
 	s.add("(");
 	boolean first = true;
 	for (VarDecl formal : this.getDecls()) {
@@ -138,7 +140,7 @@ aspect PrettyPrint {
     }
 
     public void NamedType.stringify(Stringifier s) {
-	s.add(this.getName());
+	s.add(Configuration.stringifyID(this.getName()));
     }
 
     public void ProcType.stringify(Stringifier s) {
@@ -276,7 +278,7 @@ aspect PrettyPrint {
     }
 
     public void ID.stringify(Stringifier s) {
-	s.add(this.getName());
+	s.add(Configuration.stringifyID(this.getName()));
 	// if static scoping and debugging
 	/*
 	Decl d = this.staticDeclaration();
