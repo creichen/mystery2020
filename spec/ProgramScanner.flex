@@ -39,6 +39,7 @@ DecimalNumeral = 0 | {NonZeroDigit} {Digits}?
 
 // discard whitespace information
 {WhiteSpace}  { }
+"//"[^\n]*    { /* skip comments */ }
 
 // token definitions
 ";"			{ return sym(Terminals.SEMICOLON); }
