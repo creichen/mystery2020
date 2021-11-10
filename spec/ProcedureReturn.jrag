@@ -1,0 +1,12 @@
+import mystery2020.BadReturnException;
+
+aspect ProcedureReturn {
+    inh ProcDecl Stmt.owningProcedure();
+
+    eq Program.getBody().owningProcedure() = null;
+    eq ProcDecl.getBody().owningProcedure() = this;
+
+    Return contributes (new BadReturnException(line(), "RETURN must be within PROCEDURE Body"))
+	when owningProcedure() == null
+	to Program.generalStaticErrors();
+}
